@@ -1,0 +1,101 @@
+package q3;
+import java.util.Scanner;
+
+/**
+ *
+ * @author user
+ */
+public class Q3 {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
+        Scanner sc = new Scanner(System.in);
+        int n, factorCtr = 2, factorSum = 0, j;
+        long factorPdt = 1;
+        boolean isPrime = true;
+        
+        System.out.print("Enter a positive integer larger than 1 : ");
+        n = sc.nextInt();
+        //Ensure input is larger than 1
+        while (n <= 1){
+            System.out.print("Input integer is less than or equal to 1. Enter a positive integer that is larger than 1: ");
+            n = sc.nextInt();
+        }
+        //determine whether ineteger is prime, if not count the number of factor
+        for (int i = 2; i < n; i++) {
+            if (n % i == 0) {
+                isPrime = false;
+                factorCtr++;
+            }
+        }
+        //handle overflow case
+        boolean isOverflow = false;
+        //if integer is not prime, list out factor and display sum and product of factor(if not overflowed)
+        if (!isPrime) {
+            System.out.println("Integer is not a prime number, it has " + factorCtr + " factors");
+            System.out.println("The factors of this integer are: ");
+            for (int i = 1; i <= n; i++) {
+                if (n % i == 0) {
+                    System.out.print(i);
+                    factorSum += i;
+                    if (!isOverflow) {
+                        if (factorPdt > Long.MAX_VALUE / i)
+                            isOverflow = true;
+                        else {
+                            factorPdt *= i;
+                        }
+                    }
+                    if (i != n)
+                        System.out.print(", ");
+                    else
+                        System.out.println();
+                }
+            }
+            System.out.println("The sum of the factors is " + factorSum);
+            if (isOverflow)
+                System.out.println("The product of the factors is too large to display");
+            else
+                System.out.println("The product of the factors is " + factorPdt);
+            
+            //check perfect number
+            if (factorSum-n == n)
+                System.out.println(n + " is a perfect number.");
+            else
+                System.out.println(n + " is not a perfect number.");
+        }
+        else
+            System.out.println("Integer is a prime number.");
+        
+         //print prime number
+        int count = 0;
+        int y = -1;
+        System.out.printf("Prime numbers between 2 and %d in descending order: ", n);
+        for (int i = n; i >= 2; i--) {
+            j = 2;
+            isPrime = true;
+            while (j < i) {
+                if (i % j == 0) 
+                    isPrime = false;
+                j++;
+            }
+            if (isPrime) {
+                if (count == 25 + (y * 16)) {
+                    System.out.println();
+                    y++;
+                }
+                System.out.print(i);
+                if (i != 2)
+                    System.out.print(", ");
+                count++;
+            }
+        }
+        System.out.println();
+        
+        sc.close();
+    }
+    
+}
+
