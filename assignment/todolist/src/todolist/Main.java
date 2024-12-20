@@ -8,7 +8,7 @@ package todolist;
  *
  * @author User
  */
-public class Todolist {
+public class Main {
 
     /**
      * @param args the command line arguments
