@@ -1,0 +1,8 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "dependency/javax.mail.jar",
+        "dependency/jaf-1.1.1/activation.jar",
+        "dependency/smtp-1.4.5.jar"
+    ]
+}
