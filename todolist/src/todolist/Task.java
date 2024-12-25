@@ -1,25 +1,29 @@
 package todolist;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.TimerTask;
 
 public class Task{
-    String title,description,category,priority,dependency;
-    LocalDate dueDate;
-    boolean isComplete;
+    private String name, description, category;
+    private LocalDate dueDate;
+    private boolean isCompleted;
+    private int id, priorityID, recurring;
 
-public Task(String title, String description, LocalDate dueDate, String category, String priority){
-    this.title=title;
-    this.description = description;
-    this.dueDate = dueDate;
-    this.category = category;
-    this.priority = priority;
-    this.isComplete=false;
-    this.dependency="";
-}
+    public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurring){
+        this.name = name;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.category = category;
+        this.priorityID = priorityID;
+        this.isCompleted= isCompleted;
+        this.recurring = recurring;
+    }
 
-public void setTitle(String title){
-    this.title=title;
-}
-public void setDescription(String description) {
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -31,19 +35,42 @@ public void setDescription(String description) {
         this.category = category;
     }
 
-    public void setPriority(String priority) {
-        this.priority = priority;
+    public void setPriorityID(int priorityID) {
+        this.priorityID = priorityID;
     }
 
-    public void setDependency(String dependency) {
-        this.dependency = dependency;
+    public void setIsCompleted (boolean isCompleted) {
+        this.isCompleted = isCompleted;
     }
 
-public String displayTask(){
-    return title+" - Due: "+dueDate;
-}
+    public void setRecurring (int recurring) {
+        this.recurring = recurring;
+    }
 
-public static void TaskCreate(String title, String description, LocalDate dueDate, String category, String priority){
-    System.out.println("Task \"" + title + "\" added successfully!");
-}
+    public static void taskCreate() {
+
+    }
+
+    public void taskComplete(){
+
+    }
+    
+    public void taskEdit(){
+
+    }
+
+    public void taskDelete(){
+
+    }
+
+    public void taskDependency(){
+
+    }
+
+    public void taskRecurring(){
+
+    }
+    public void taskDependencyCheck(){
+
+    }
 }
