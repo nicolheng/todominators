@@ -11,7 +11,7 @@ public class Database {
     public static boolean executeUpdate(String query){
         try (Connection conn = getConnection();
             Statement stmt = conn.createStatement(); ) {
-            stmt.executeUpdate(query); // Executes the query (e.g., INSERT, UPDATE, DELETE)
+            stmt.executeUpdate(query);
             return true;
         } catch (SQLException e) {
             System.out.println("Error occurs: " + e.getMessage());
