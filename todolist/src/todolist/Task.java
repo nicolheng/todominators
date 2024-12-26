@@ -1,7 +1,6 @@
 package todolist;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.TimerTask;
 
 public class Task{
     private String name, description, category;
