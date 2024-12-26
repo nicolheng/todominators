@@ -20,4 +20,7 @@ public class List extends Database{
     public void listSearch(){
 
     }
+    public ArrayList<Task> dueCheck(){
+        
+    }
 }
