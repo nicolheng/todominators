@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.mail.Message;
 import javax.mail.MessagingException;
