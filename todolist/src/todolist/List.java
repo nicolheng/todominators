@@ -2,7 +2,7 @@ package todolist;
 
 import java.util.ArrayList;
 
-public class List extends Database{
+public class List {
     static ArrayList <Task> list;
 
     public List{ //taskload here
@@ -18,6 +18,9 @@ public class List extends Database{
     }
 
     public void listSearch(){
+
+    }
+    public ArrayList<Task> dueCheck(){
 
     }
 }

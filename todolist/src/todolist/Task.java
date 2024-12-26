@@ -1,6 +1,5 @@
 package todolist;
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class Task{
     private String name, description, category;
@@ -9,6 +8,7 @@ public class Task{
     private int id, priorityID, recurring;
 
     public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurring){
+        this.id = id;
         this.name = name;
         this.description = description;
         this.dueDate = dueDate;
@@ -44,6 +44,38 @@ public class Task{
 
     public void setRecurring (int recurring) {
         this.recurring = recurring;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public int getID(){
+        return this.id;
+    }
+
+    public String getDescription(){
+        return this.description;
+    }
+
+    public LocalDate getDueDate(){
+        return this.dueDate;
+    }
+
+    public String getCategory(){
+        return this.category;
+    }
+
+    public boolean getIsCompleted(){
+        return this.isCompleted;
+    }
+
+    public int getPriorityID(){
+        return this.priorityID;
+    }
+
+    public int getRecurring(){
+        return this.recurring;
     }
 
     public static void taskCreate() {
