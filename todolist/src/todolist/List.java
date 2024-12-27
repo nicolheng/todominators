@@ -174,3 +174,99 @@ public class List {
 
     }
 }
+
+public class List {
+    private ArrayList<List> tasks; // Storing tasks as List objects, which is unconventional
+
+    // Task data fields
+    private int taskId;
+    private String taskName;
+    private String taskDescription;
+    private String taskDueDate;
+    private String taskCategory;
+    private String taskPriority;
+    private boolean isCompleted;
+
+    // Constructor for task data
+    public List(int taskId, String taskName, String taskDescription, String taskDueDate, String taskCategory, String taskPriority, boolean isCompleted) {
+        this.taskId = taskId;
+        this.taskName = taskName;
+        this.taskDescription = taskDescription;
+        this.taskDueDate = taskDueDate;
+        this.taskCategory = taskCategory;
+        this.taskPriority = taskPriority;
+        this.isCompleted = isCompleted;
+    }
+
+    // Default constructor for database manager
+    public List() {
+        this.tasks = new ArrayList<>();
+    }
+
+    // Load tasks into the list
+    public void listLoad() {
+        String query = "SELECT * FROM tasks";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            tasks.clear(); // Clear existing tasks before loading
+
+            while (rs.next()) {
+                taskId = rs.getInt("task_id");
+                taskName = rs.getString("task_name");
+                taskDescription = rs.getString("task_description");
+                taskDueDate = rs.getString("task_due_date");
+                taskCategory = rs.getString("task_category");
+                taskPriority = rs.getString("task_priority");
+                isCompleted = rs.getBoolean("is_completed");
+
+                // Create a new List object for each task (unconventional)
+                List task = new List(taskId, taskName, taskDescription, taskDueDate, taskCategory, taskPriority, isCompleted);
+                tasks.add(task);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error occurs: " + e.getMessage());
+        }
+    }
+
+    // Getters for task fields (if needed)
+    public int getTaskId() {
+        return taskId;
+    }
+
+    public String getTaskName(int x) {
+        for (List task : tasks) {
+        if (task.taskId == x)
+            return task.taskName;
+        }
+    return null;
+    }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public String getTaskDueDate() {
+        return taskDueDate;
+    }
+
+    public String getTaskCategory() {
+        return taskCategory;
+    }
+
+    public String getTaskPriority() {
+        return taskPriority;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    // Getter for the task list
+    public ArrayList<List> getTasks() {
+        return tasks;
+    }
+}
