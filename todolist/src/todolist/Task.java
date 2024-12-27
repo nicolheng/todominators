@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Task{
-    private String name, description, category;
+    private String name, description, category,priorityName;
     private LocalDate dueDate;
     private boolean isCompleted;
     private int id, priorityID, recurringID;
@@ -17,6 +17,7 @@ public class Task{
         this.dueDate = dueDate;
         this.category = category;
         this.priorityID = priorityID;
+        this.priorityName = setPriorityName(priorityID);
         this.isCompleted= isCompleted;
         this.recurringID = recurringID;
     }
@@ -39,6 +40,24 @@ public class Task{
 
     public void setPriorityID(int priorityID) {
         this.priorityID = priorityID;
+        this.priorityName = setPriorityName(priorityID);
+    }
+    
+    public String getPriorityName(){
+        return priorityName;
+    }
+
+    private String setPriorityName(int priorityID){
+        switch(priorityID){
+            case 1:
+                return "Low";
+            case 2:
+                return "Medium";
+            case 3:
+                return "High";
+            default:
+                return "Unknown";
+        }
     }
 
     public void setIsCompleted (boolean isCompleted) {
