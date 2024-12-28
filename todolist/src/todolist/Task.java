@@ -1,5 +1,6 @@
 package todolist;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
 
@@ -7,7 +8,7 @@ public class Task {
     private String name, description, category,priorityName;
     private LocalDate dueDate;
     private boolean isCompleted;
-    private int id, priorityID, recurring;
+    private int id, priorityID, recurringID;
     private ArrayList<String> dc_taskDependsName;
     private ArrayList<Integer> dc_taskId, dc_taskDependsId;
     private ArrayList<Boolean> dc_isCompleted;
@@ -20,7 +21,7 @@ public class Task {
         dc_isCompleted = new ArrayList<>();
     }
 
-    public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurring){
+    public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurringID){
         this.id = id;
         this.name = name;
         this.description = description;
@@ -29,7 +30,7 @@ public class Task {
         this.priorityID = priorityID;
         this.priorityName = setPriorityName(priorityID);
         this.isCompleted= isCompleted;
-        this.recurring = recurring;
+        this.recurringID = recurringID;
     }
 
     public void setName(String name){
@@ -74,8 +75,8 @@ public class Task {
         this.isCompleted = isCompleted;
     }
 
-    public void setRecurring (int recurring) {
-        this.recurring = recurring;
+    public void setRecurringID (int recurringID) {
+        this.recurringID = recurringID;
     }
 
     public String getName(){
@@ -106,8 +107,8 @@ public class Task {
         return this.priorityID;
     }
 
-    public int getRecurring(){
-        return this.recurring;
+    public int getRecurringID(){
+        return this.recurringID;
     }
 
     public static void taskCreate() {
@@ -165,7 +166,46 @@ public class Task {
     }
 
     public void taskDelete(){
+        if (taskRecurringCheck()){
+            Scanner input = new Scanner("y");
+            String check = input.next();
+            input.close();
+            if (check.equals("y")){
+                try (Connection conn = Database.getConnection();
+                    var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
+                    stmt.setString(1, this.name);
+                    stmt.setString(2, this.description);
+                    String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    switch (this.recurringID) {
+                        case 2:
+                            newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                            break;
+                        case 3:
+                            newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                        case 4:
+                            newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                        default:
+                            break;
+                    }
+                    stmt.setString(3, newDate);
+                    stmt.setString(4, this.category);
+                    stmt.setInt(5, this.priorityID);
+                    stmt.setInt(6, this.recurringID);
+                    stmt.executeUpdate();
 
+                } catch (SQLException e){
+                    System.out.println("Error occurs: " + e.getMessage());
+                }
+            }
+        }
+        try (Connection conn = Database.getConnection();
+            var stmt = conn.prepareStatement("DELETE FROM tasks where task_id = ? ");){
+            stmt.setInt(1, this.id);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            System.out.println("Error occurs: " + e.getMessage());
+        }
     }
 
     
@@ -186,7 +226,7 @@ public class Task {
     }
 
     public void taskRecurring(){
-
+        
     }
 
     //check for loop dependencies/existing dependencies
@@ -270,5 +310,9 @@ public class Task {
         if (x > max)
             return false;
         return true;
+    }
+
+    public boolean taskRecurringCheck(){
+        return (getRecurringID() != 1);
     }
 }
