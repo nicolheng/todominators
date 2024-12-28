@@ -121,7 +121,9 @@ public class Task {
                         "FROM task_dependencies td " +
                         "JOIN tasks t ON td.depends_on_task_id = t.task_id " +
                         "WHERE td.task_id = " + taskId;
-        
+        if (taskRecurringCheck()){
+            taskRecurring();
+        }
         // If no dependencies or all dependencies are completed, mark task as completed
         String query2 = "UPDATE tasks SET is_completed = TRUE WHERE task_id = " + taskId;
         
@@ -201,6 +203,7 @@ public class Task {
         System.out.println();
     }
 
+    //recurring concept: create a task with same detail but different due date
     public void taskRecurring(){
         try (Connection conn = Database.getConnection();
             var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
@@ -312,6 +315,7 @@ public class Task {
         return true;
     }
 
+    //recurring id = 1 when there is no recurring
     public boolean taskRecurringCheck(){
         return (getRecurringID() != 1);
     }
