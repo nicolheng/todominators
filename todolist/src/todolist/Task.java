@@ -105,7 +105,7 @@ public class Task{
     }
 
     public void taskComplete(){
-
+        
     }
     
     public void taskEdit(){
@@ -118,31 +118,7 @@ public class Task{
             String check = input.next();
             input.close();
             if (check.equals("y")){
-                try (Connection conn = Database.getConnection();
-                    var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
-                    stmt.setString(1, this.name);
-                    stmt.setString(2, this.description);
-                    String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    switch (this.recurringID) {
-                        case 2:
-                            newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                            break;
-                        case 3:
-                            newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                        case 4:
-                            newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                        default:
-                            break;
-                    }
-                    stmt.setString(3, newDate);
-                    stmt.setString(4, this.category);
-                    stmt.setInt(5, this.priorityID);
-                    stmt.setInt(6, this.recurringID);
-                    stmt.executeUpdate();
-
-                } catch (SQLException e){
-                    System.out.println("Error occurs: " + e.getMessage());
-                }
+                taskRecurring();
             }
         }
         try (Connection conn = Database.getConnection();
@@ -160,7 +136,31 @@ public class Task{
     }
 
     public void taskRecurring(){
-        
+        try (Connection conn = Database.getConnection();
+            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
+            stmt.setString(1, this.name);
+            stmt.setString(2, this.description);
+            String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            switch (this.recurringID) {
+                case 2:
+                    newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                case 3:
+                    newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                case 4:
+                    newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                default:
+                    break;
+            }
+            stmt.setString(3, newDate);
+            stmt.setString(4, this.category);
+            stmt.setInt(5, this.priorityID);
+            stmt.setInt(6, this.recurringID);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            System.out.println("Error occurs: " + e.getMessage());
+        }
     }
 
     public void taskDependencyCheck(){
