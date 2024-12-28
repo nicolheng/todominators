@@ -4,28 +4,29 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class List {
     private static ArrayList <Task> tasks;
 
     public List(){ //taskload here
         tasks = new ArrayList<>();
-    }
-
-    public void executeTaskLoad() {
-    String query = "SE:ECT * FROM tasks";
+        String query = "SELECT * FROM tasks";
         try (Connection conn = Database.getConnection();
-             Statement stmt = conn.createStatement(); 
-             ResultSet rs = stmt.executeQuery(query);) {
-            
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);) {
+
+            tasks.clear(); // Clear existing tasks before loading
+
             // load tasks from database
             while(rs.next()){
                 int id = rs.getInt("task_id");
                 String name = rs.getString("task_name");
                 String description = rs.getString("task_description");
                 String category = rs.getString("task_category");
-                java.sql.Date sqlDate = rs.getDate("task_due_date");
-                LocalDate dueDate = sqlDate.toLocalDate();
+                String sqlDate = rs.getString("task_due_date");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                LocalDate dueDate = LocalDate.parse(sqlDate, formatter);
                 int priorityID = rs.getInt("task_priorityID");
                 boolean isCompleted = rs.getBoolean("is_completed");
                 int recurring = rs.getInt("task_recurring");
@@ -38,18 +39,22 @@ public class List {
             System.out.println("Error occurs: " + e.getMessage());
         }
     }
-   public static void main(String[] args) {
-      List list = new List();
-      list.listSearch();
-      list.listSort();
-   }
+
+        public static void main(String[] args) {
+        List list = new List();
+        list.display();;
+        list.listSearch();
+        list.listSort();
+        list.display();;
+    }
+
     public void listAnalytics(){
 
     }
 
     // sort
     public void listSort(){
-         Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         System.out.print("Sort by > ");
         int option = sc.nextInt();
         switch(option){
@@ -68,6 +73,7 @@ public class List {
             default:
                 System.out.println("Invalid option. Please try again.");
         }
+        sc.close();
     }
 
 // sort by duedate ascending
@@ -84,7 +90,7 @@ public class List {
                     tasks.set(j+1,temp);
                     swapped = true;
                 }
-              }
+            }
                 // if no two elements are swapped, the list is sorted
                 if (!swapped)
                     break;
@@ -170,7 +176,30 @@ public class List {
             System.out.println("No task found for " + keyword);
     }
 
-    public ArrayList<Task> dueCheck(){
+    public ArrayList<Task> dueCheck() {
 
+    }
+
+    public String getTaskName(int x) {
+        for (Task task : tasks) {
+        if (task.getID() == x)
+            return task.getName();
+        }
+    return null;
+    }
+
+
+    //debugging purpose
+    public void display() {
+        for (Task task : tasks)
+            System.out.println("Task{" +
+                "taskId=" + task.getID() +
+                ", taskName='" + task.getName() + '\'' +
+                ", taskDescription='" + task.getDescription() + '\'' +
+                ", taskDueDate='" + task.getDueDate() + '\'' +
+                ", taskCategory='" + task.getCategory() + '\'' +
+                ", taskPriority='" + task.getPriorityName() + '\'' +
+                ", isCompleted=" + task.getIsCompleted() +
+                '}');
     }
 }
