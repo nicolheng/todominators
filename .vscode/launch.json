@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Task",
+            "request": "launch",
+            "mainClass": "todolist.Task",
+            "projectName": "todominators_89a1f522"
+        },
+        {
+            "type": "java",
+            "name": "todolist",
+            "request": "launch",
+            "mainClass": "todolist.test",
+            "vmArgs": "--module-path dependency/javafx-sdk-23.0.1/lib --add-modules javafx.controls,javafx.fxml"
+        }
+    ]
+}
