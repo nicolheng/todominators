@@ -80,9 +80,7 @@ public class Email {
         }
     }
 
-    public static void main(String[] args) {
-        
-        String to = "nicolhengsiyi@gmail.com";
+    public static void startEmail(String to){
         Email test = new Email(to);
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(new Runnable() {
@@ -100,9 +98,5 @@ public class Email {
                 }
             }
         }, 1, 1, TimeUnit.MINUTES);
-
-        
-        
-        
     }
 }
