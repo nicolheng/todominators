@@ -168,14 +168,6 @@ public class Task {
     }
 
     public void taskDelete(){
-        if (taskRecurringCheck()){
-            Scanner input = new Scanner("y");
-            String check = input.next();
-            input.close();
-            if (check.equals("y")){
-                taskRecurring();
-            }
-        }
         try (Connection conn = Database.getConnection();
             var stmt = conn.prepareStatement("DELETE FROM tasks where task_id = ? ");){
             stmt.setInt(1, this.id);
@@ -216,8 +208,10 @@ public class Task {
                     break;
                 case 3:
                     newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
                 case 4:
                     newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
                 default:
                     break;
             }
@@ -318,5 +312,15 @@ public class Task {
     //recurring id = 1 when there is no recurring
     public boolean taskRecurringCheck(){
         return (getRecurringID() != 1);
+    }
+
+    public static void main(String[] args) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String date = "26-12-2024";
+      
+        //convert String to LocalDate
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        Task test = new Task(4, "FOP tutorial","tutorial",localDate ,"Homework", false, 3, 3);
+        test.taskDelete();
     }
 }
