@@ -10,6 +10,8 @@ package todolist;
  */
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -59,8 +61,7 @@ public class Testing123 extends Application {
 
         column3.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
 
-        TableColumn<Task, String> column4 = new TableColumn("Action");
-
+        TableColumn<Task, String> column4 = new TableColumn<>("Action");
         column4.setCellValueFactory(new PropertyValueFactory<>("button"));
 
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -68,10 +69,10 @@ public class Testing123 extends Application {
         tableView.getColumns().add(column2);
         tableView.getColumns().add(column3);
         tableView.getColumns().add(column4);                                                                            
-        List a = new List();
-        for (Task task: a.getList()) {
-            tableView.getItems().add(task);
-        }
+        List tasks = new List();
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
+
+        tableView.setItems(tasksDisplay);
 
         // Center section: Task display area
         VBox taskDisplayArea = new VBox(tableView);
