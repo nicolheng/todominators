@@ -29,9 +29,9 @@ public class List {
                 LocalDate dueDate = LocalDate.parse(sqlDate, formatter);
                 int priorityID = rs.getInt("task_priorityID");
                 boolean isCompleted = rs.getBoolean("is_completed");
-                int recurring = rs.getInt("task_recurring");
+                int recurringID = rs.getInt("task_recurringID");
                 
-                Task task = new Task(id,name,description,dueDate,category,isCompleted,priorityID,recurring);
+                Task task = new Task(id,name,description,dueDate,category,isCompleted,priorityID,recurringID);
                 tasks.add(task);
             }
         }

@@ -87,6 +87,7 @@ public class Testing123 extends Application {
         analysisButton.setOnAction(event -> showAnalytics());
 
         Button taskButton = new Button("Add Task");
+        taskButton.setOnAction(event -> showCreate());
 
         Button promptEmailButton = new Button("Prompt Email");
         promptEmailButton.setOnAction(event -> promptEmail());
@@ -97,7 +98,7 @@ public class Testing123 extends Application {
         StackPane addButtonPane = new StackPane();
         Button addButton = new Button("+");
         addButton.setStyle("-fx-font-size: 20px; -fx-background-radius: 50%;");
-        addButton.setOnAction(event -> taskAdd());
+        addButton.setOnAction(event -> showCreate());
         addButtonPane.getChildren().add(addButton);
         StackPane.setAlignment(addButton, Pos.BOTTOM_RIGHT);
         StackPane.setMargin(addButton, new Insets(10));
@@ -126,18 +127,23 @@ public class Testing123 extends Application {
         // Implement sorting functionality here
     }
 
-    private void taskAdd() {
+    private void showCreate() {
         System.out.println("Add task button clicked.");
         // Implement task addition functionality here
     }
 
-    private void showAnalysis() {
+    private void showAnalytics() {
         System.out.println("Analysis button clicked.");
         // Implement analysis functionality here
     }
 
     private void promptEmail() {
         System.out.println("Prompt email button clicked.");
+        TextInputDialog td = new TextInputDialog(); 
+        td.setHeaderText("enter your email");
+        td.showAndWait();
+        String email = td.getEditor().getText(); 
+        Email.startEmail(email);
         // Implement email prompting functionality here
     }
 
