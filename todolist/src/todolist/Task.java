@@ -132,7 +132,9 @@ public class Task {
                         "FROM task_dependencies td " +
                         "JOIN tasks t ON td.depends_on_task_id = t.task_id " +
                         "WHERE td.task_id = " + taskId;
-        
+        if (taskRecurringCheck()){
+            taskRecurring();
+        }
         // If no dependencies or all dependencies are completed, mark task as completed
         String query2 = "UPDATE tasks SET is_completed = TRUE WHERE task_id = " + taskId;
         
@@ -177,38 +179,6 @@ public class Task {
     }
 
     public void taskDelete(){
-        if (taskRecurringCheck()){
-            Scanner input = new Scanner("y");
-            String check = input.next();
-            input.close();
-            if (check.equals("y")){
-                try (Connection conn = Database.getConnection();
-                    var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
-                    stmt.setString(1, this.name);
-                    stmt.setString(2, this.description);
-                    String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    switch (this.recurringID) {
-                        case 2:
-                            newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                            break;
-                        case 3:
-                            newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                        case 4:
-                            newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                        default:
-                            break;
-                    }
-                    stmt.setString(3, newDate);
-                    stmt.setString(4, this.category);
-                    stmt.setInt(5, this.priorityID);
-                    stmt.setInt(6, this.recurringID);
-                    stmt.executeUpdate();
-
-                } catch (SQLException e){
-                    System.out.println("Error occurs: " + e.getMessage());
-                }
-            }
-        }
         try (Connection conn = Database.getConnection();
             var stmt = conn.prepareStatement("DELETE FROM tasks where task_id = ? ");){
             stmt.setInt(1, this.id);
@@ -236,8 +206,35 @@ public class Task {
         System.out.println();
     }
 
+    //recurring concept: create a task with same detail but different due date
     public void taskRecurring(){
-        
+        try (Connection conn = Database.getConnection();
+            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
+            stmt.setString(1, this.name);
+            stmt.setString(2, this.description);
+            String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            switch (this.recurringID) {
+                case 2:
+                    newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                case 3:
+                    newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                case 4:
+                    newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                default:
+                    break;
+            }
+            stmt.setString(3, newDate);
+            stmt.setString(4, this.category);
+            stmt.setInt(5, this.priorityID);
+            stmt.setInt(6, this.recurringID);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            System.out.println("Error occurs: " + e.getMessage());
+        }
     }
 
     //check for loop dependencies/existing dependencies
@@ -323,7 +320,18 @@ public class Task {
         return true;
     }
 
+    //recurring id = 1 when there is no recurring
     public boolean taskRecurringCheck(){
         return (getRecurringID() != 1);
+    }
+
+    public static void main(String[] args) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String date = "26-12-2024";
+      
+        //convert String to LocalDate
+        LocalDate localDate = LocalDate.parse(date, formatter);
+        Task test = new Task(4, "FOP tutorial","tutorial",localDate ,"Homework", false, 3, 3);
+        test.taskDelete();
     }
 }
