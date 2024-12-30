@@ -176,10 +176,6 @@ public class List {
             System.out.println("No task found for " + keyword);
     }
 
-    public ArrayList<Task> dueCheck() {
-
-    }
-
     public String getTaskName(int x) {
         for (Task task : tasks) {
         if (task.getID() == x)
@@ -188,7 +184,9 @@ public class List {
     return null;
     }
 
-
+    public ArrayList<Task> getList(){
+        return tasks;
+    }
     //debugging purpose
     public void display() {
         for (Task task : tasks)

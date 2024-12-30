@@ -9,20 +9,19 @@ package todolist;
  * @author User
  */
 
-
-imp
-
-
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import taskload.newpackage.taskloadd; // Import your taskloadd class
+import java.time.LocalDate;
 
 public class Testing123 extends Application {
 
     // Instance of taskloadd to load tasks
-    private taskloadd taskLoader = new taskloadd();
 
     @Override
     public void start(Stage primaryStage) {
@@ -49,17 +48,28 @@ public class Testing123 extends Application {
         
         TableColumn<Task, String> column1 = new TableColumn<>("Name");
 
-        column1.setCellValueFactory(new PropertyValueFactory<>("Name"));
+        column1.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 
-        TableColumn<Task, localDate> column2 = new TableColumn<>("Due date");
+        TableColumn<Task, LocalDate> column2 = new TableColumn<>("Due date");
 
-        column2.setCellValueFactory(new PropertyValueFactory<>("Due date"));
+        column2.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
 
+        TableColumn<Task, String> column3 = new TableColumn<>("Priority");
+
+        column3.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
+
+        TableColumn<Task, String> column4 = new TableColumn("Action");
+
+        column4.setCellValueFactory(new PropertyValueFactory<>("button"));
+
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.getColumns().add(column1);
         tableView.getColumns().add(column2);
+        tableView.getColumns().add(column3);
+        tableView.getColumns().add(column4);                                                                            
         List a = new List();
-        for (Task task: a) {
+        for (Task task: a.getList()) {
             tableView.getItems().add(task);
         }
 
@@ -67,18 +77,16 @@ public class Testing123 extends Application {
         VBox taskDisplayArea = new VBox(tableView);
         taskDisplayArea.setPadding(new Insets(10));
         taskDisplayArea.setSpacing(10);
-        taskLoad(taskDisplayArea); // Call to load tasks into the display area
 
         // Bottom section: Buttons
         HBox bottomBar = new HBox(10);
         bottomBar.setPadding(new Insets(10));
         bottomBar.setAlignment(Pos.CENTER);
 
-        Button analysisButton = new Button("Analysis");
-        analysisButton.setOnAction(event -> analysis());
+        Button analysisButton = new Button("Analytics");
+        analysisButton.setOnAction(event -> showAnalytics());
 
-        Button taskButton = new Button("Task");
-        taskButton.setOnAction(event -> taskLoad(taskDisplayArea));
+        Button taskButton = new Button("Add Task");
 
         Button promptEmailButton = new Button("Prompt Email");
         promptEmailButton.setOnAction(event -> promptEmail());
@@ -118,25 +126,12 @@ public class Testing123 extends Application {
         // Implement sorting functionality here
     }
 
-    private void taskLoad(VBox taskDisplayArea) {
-        taskDisplayArea.getChildren().clear();
-        taskLoader.loadTasksFromDatabase(); // Load tasks from database
-        System.out.println("Loading tasks...");
-
-        // Loop through tasks and display them
-        taskLoader.getTasks().forEach(task -> {
-            // Create a label for each task
-            Label taskLabel = new Label(task.getTaskName() + " - " + task.getTaskDueDate());
-            taskDisplayArea.getChildren().add(taskLabel);
-        });
-    }
-
     private void taskAdd() {
         System.out.println("Add task button clicked.");
         // Implement task addition functionality here
     }
 
-    private void analysis() {
+    private void showAnalysis() {
         System.out.println("Analysis button clicked.");
         // Implement analysis functionality here
     }

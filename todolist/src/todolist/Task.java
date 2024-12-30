@@ -3,6 +3,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
+import javafx.scene.control.Button;
 
 public class Task {
     private String name, description, category,priorityName;
@@ -13,6 +14,7 @@ public class Task {
     private ArrayList<Integer> dc_taskId, dc_taskDependsId;
     private ArrayList<Boolean> dc_isCompleted;
     private Map<Integer, Integer> dependencyMap;
+    private Button button;
     
     public Task() {
         dc_taskDependsName = new ArrayList<>();
@@ -31,6 +33,7 @@ public class Task {
         this.priorityName = setPriorityName(priorityID);
         this.isCompleted= isCompleted;
         this.recurringID = recurringID;
+        this.button = new Button("Detail");                                                                         
     }
 
     public void setName(String name){
@@ -109,6 +112,14 @@ public class Task {
 
     public int getRecurringID(){
         return this.recurringID;
+    }
+
+    public void setButton (Button button){
+        this.button = button;
+    }
+
+    public Button getButton(){
+        return button;
     }
 
     public static void taskCreate() {
