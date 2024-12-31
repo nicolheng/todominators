@@ -18,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.time.LocalDate;
 
@@ -135,7 +136,15 @@ public class Testing123 extends Application {
 
     private void showAnalytics() {
         System.out.println("Analysis button clicked.");
-        // Implement analysis functionality here
+        Stage analytics = new Stage();
+        String output = List.listAnalytics();
+        Label label = new Label(output);
+        StackPane analyticsLayout = new StackPane(label);
+        analyticsLayout.setStyle("-fx-padding: 20px;");
+        Scene analyticsScene = new Scene(analyticsLayout, 250, 300);
+        analytics.setTitle("Analytics");
+        analytics.setScene(analyticsScene);
+        analytics.showAndWait();
     }
 
     private void promptEmail() {
