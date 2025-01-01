@@ -22,13 +22,22 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Testing123 extends Application {
+public class Main extends Application {
 
 
     @Override
     public void start(Stage primaryStage) {
         // Root layout
         BorderPane root = new BorderPane();
+        
+        TextField searchBar = new TextField();
+        searchBar.setPromptText("Search Task");
+        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
+
+        ObservableList<String> items = FXCollections.observableArrayList("Due Date Ascending", "Due Date Descending", "Priority (High to Low)", "Priority (Low to High)");
+        ComboBox<String> sortDropdown = new ComboBox<>(items);
+        sortDropdown.setItems(items);
+        sortDropdown.setValue("Due Date Ascending");
         TableView tableView = new TableView();
         
         TableColumn<Task, String> column1 = new TableColumn<>("Name");
@@ -55,20 +64,12 @@ public class Testing123 extends Application {
         List tasks = new List();
         ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
 
-        tableView.setItems(tasksDisplay);
+        tableView.setItems(sortTasks("Due Date Ascending"));
 
         // Top section: Search bar and sorting dropdown
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(10));
         
-        TextField searchBar = new TextField();
-        searchBar.setPromptText("Search Task");
-        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
-
-        ObservableList<String> items = FXCollections.observableArrayList("Due Date Ascending", "Due Date Descending", "Priority (High to Low)", "Priority (Low to High)");
-        ComboBox<String> sortDropdown = new ComboBox<>(items);
-        sortDropdown.setItems(items);
-        sortDropdown.setValue("Due Date Ascending");
         sortDropdown.setOnAction(event -> tableView.setItems(sortTasks(sortDropdown.getValue())));
 
         topBar.getChildren().addAll(searchBar, sortDropdown);
