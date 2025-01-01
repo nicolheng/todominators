@@ -179,11 +179,16 @@ public class Task {
     }
 
     public void taskDelete(){
-        try (Connection conn = Database.getConnection();
-            var stmt = conn.prepareStatement("DELETE FROM tasks where task_id = ? ");){
+        try (Connection conn = Database.getConnection();){
+            var stmt = conn.prepareStatement("DELETE FROM tasks where task_id = ? ");
             stmt.setInt(1, this.id);
             stmt.executeUpdate();
 
+            var stmtDependency = conn.prepareStatement("DELETE FROM task_dependencies where task_id = ? or depends_on_task_id = ?");
+            stmtDependency.setInt(1, this.id);
+            stmtDependency.setInt(2, this.id);
+            stmtDependency.executeUpdate();
+            
         } catch (SQLException e){
             System.out.println("Error occurs: " + e.getMessage());
         }
