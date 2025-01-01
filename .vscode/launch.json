@@ -2,13 +2,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Analytics",
-            "request": "launch",
-            "mainClass": "todolist.Analytics",
-            "projectName": "todominators_89a1f522"
-        },
-        {
-            "type": "java",
             "name": "todolist",
             "request": "launch",
             "mainClass": "todolist.Testing123",

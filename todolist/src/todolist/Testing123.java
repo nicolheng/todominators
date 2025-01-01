@@ -18,35 +18,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class Testing123 extends Application {
 
-    // Instance of taskloadd to load tasks
 
     @Override
     public void start(Stage primaryStage) {
         // Root layout
         BorderPane root = new BorderPane();
-
-        // Top section: Search bar and sorting dropdown
-        HBox topBar = new HBox(10);
-        topBar.setPadding(new Insets(10));
-        
-        TextField searchBar = new TextField();
-        searchBar.setPromptText("Search Task");
-        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
-
-        ComboBox<String> sortDropdown = new ComboBox<>();
-        sortDropdown.getItems().addAll("Due Date", "Priority", "Name (A-Z)", "Created Time");
-        sortDropdown.setPromptText("Sort by:");
-        sortDropdown.setOnAction(event -> sortTasks(sortDropdown.getValue()));
-
-        topBar.getChildren().addAll(searchBar, sortDropdown);
-        topBar.setAlignment(Pos.CENTER);
-
         TableView tableView = new TableView();
         
         TableColumn<Task, String> column1 = new TableColumn<>("Name");
@@ -74,6 +56,23 @@ public class Testing123 extends Application {
         ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
 
         tableView.setItems(tasksDisplay);
+
+        // Top section: Search bar and sorting dropdown
+        HBox topBar = new HBox(10);
+        topBar.setPadding(new Insets(10));
+        
+        TextField searchBar = new TextField();
+        searchBar.setPromptText("Search Task");
+        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
+
+        ObservableList<String> items = FXCollections.observableArrayList("Due Date Ascending", "Due Date Descending", "Priority (High to Low)", "Priority (Low to High)");
+        ComboBox<String> sortDropdown = new ComboBox<>(items);
+        sortDropdown.setItems(items);
+        sortDropdown.setValue("Due Date Ascending");
+        sortDropdown.setOnAction(event -> tableView.setItems(sortTasks(sortDropdown.getValue())));
+
+        topBar.getChildren().addAll(searchBar, sortDropdown);
+        topBar.setAlignment(Pos.CENTER);
 
         // Center section: Task display area
         VBox taskDisplayArea = new VBox(tableView);
@@ -124,9 +123,22 @@ public class Testing123 extends Application {
         // Implement search functionality here
     }
 
-    private void sortTasks(String criteria) {
+    private ObservableList<Task> sortTasks(String criteria) {
         System.out.println("Sorting by: " + criteria);
         // Implement sorting functionality here
+        int choiceInt;
+        if (criteria.equals("Due Date Ascending"))
+            choiceInt = 1;
+        else if (criteria.equals("Due Date Descending"))
+            choiceInt = 2;
+        else if (criteria.equals("Priority (High to Low)"))
+            choiceInt = 3;
+        else
+            choiceInt = 4;
+        ArrayList <Task> sorted = List.listSort(choiceInt);
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(sorted);
+        return tasksDisplay;
+
     }
 
     private void showCreate() {

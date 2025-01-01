@@ -40,14 +40,6 @@ public class List {
         }
     }
 
-        public static void main(String[] args) {
-        List list = new List();
-        list.display();;
-        list.listSearch();
-        list.listSort();
-        list.display();;
-    }
-
     public static String listAnalytics(){
         String metricsQuery = """
     WITH 
@@ -121,41 +113,39 @@ public class List {
     }
 
     // sort
-    public void listSort(){
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Sort by > ");
-        int option = sc.nextInt();
+    public static ArrayList<Task> listSort(int option){
+        ArrayList<Task> sorted = tasks;
         switch(option){
             case 1:
-                DueDateAscending();
+                sorted = DueDateAscending(tasks);
                 break;
             case 2:
-                DueDateDescending();
+                sorted = DueDateDescending(tasks);
                 break;
             case 3:
-                PriorityHighToLow();
+                sorted = PriorityHighToLow(tasks);
                 break;
             case 4:
-                PriorityLowToHigh();
+                sorted = PriorityLowToHigh(tasks);
                 break;
             default:
                 System.out.println("Invalid option. Please try again.");
         }
-        sc.close();
+        return sorted;
     }
 
 // sort by duedate ascending
-    private void DueDateAscending(){
+    private static ArrayList<Task> DueDateAscending(ArrayList<Task>list){
         boolean swapped;
         // number of passess
-        for (int i=1;i<tasks.size();i++){
+        for (int i=1;i<list.size();i++){
             swapped = false;
-            for (int j=0;j<tasks.size()-1;j++){
-                if (tasks.get(j).getDueDate().compareTo(tasks.get(j+1).getDueDate())>0){
+            for (int j=0;j<list.size()-1;j++){
+                if (list.get(j).getDueDate().compareTo(list.get(j+1).getDueDate())>0){
                     // swap tasks
-                    Task temp = tasks.get(j);
-                    tasks.set(j,tasks.get(j+1));
-                    tasks.set(j+1,temp);
+                    Task temp = list.get(j);
+                    list.set(j,list.get(j+1));
+                    list.set(j+1,temp);
                     swapped = true;
                 }
             }
@@ -163,17 +153,18 @@ public class List {
                 if (!swapped)
                     break;
         }
+        return list;
     }
     // sort by due date descending
-    private void DueDateDescending(){
+    private static ArrayList<Task> DueDateDescending(ArrayList <Task> list){
         boolean swapped;
-        for (int i=1;i<tasks.size();i++){
+        for (int i=1;i<list.size();i++){
             swapped = false;
-            for (int j=0;j<tasks.size()-1;j++){
-                if (tasks.get(j).getDueDate().compareTo(tasks.get(j+1).getDueDate())<0){
-                    Task temp = tasks.get(j);
-                    tasks.set(j,tasks.get(j+1));
-                    tasks.set(j+1, temp);
+            for (int j=0;j<list.size()-1;j++){
+                if (list.get(j).getDueDate().compareTo(list.get(j+1).getDueDate())<0){
+                    Task temp = list.get(j);
+                    list.set(j,list.get(j+1));
+                    list.set(j+1, temp);
                     swapped = true;
                 }
             }
@@ -181,19 +172,20 @@ public class List {
             if(!swapped)
                 break;
         }
+        return list;
     }
 
      // sort priority high to low
-    private void PriorityHighToLow(){
+    private static ArrayList<Task> PriorityHighToLow(ArrayList <Task> list){
         boolean swapped;
-        for (int i=1;i<tasks.size();i++){
+        for (int i=1;i<list.size();i++){
             swapped = false;
-            for(int j=0;j<tasks.size()-1;j++){
-                if(tasks.get(j).getPriorityID()<tasks.get(j+1).getPriorityID()){
+            for(int j=0;j<list.size()-1;j++){
+                if(list.get(j).getPriorityID()<list.get(j+1).getPriorityID()){
                     // swap tasks
-                    Task temp = tasks.get(j);
-                    tasks.set(j,tasks.get(j+1));
-                    tasks.set(j+1,temp);
+                    Task temp = list.get(j);
+                    list.set(j,list.get(j+1));
+                    list.set(j+1,temp);
                     swapped = true;
                 }
             }
@@ -201,18 +193,19 @@ public class List {
             if(!swapped)
                 break;
         }
+        return list;
     }
     // sort priority low to high
-    private void PriorityLowToHigh(){
+    private static ArrayList <Task> PriorityLowToHigh(ArrayList <Task> list){
         boolean swapped;
-        for (int i=1;i<tasks.size();i++){
+        for (int i=1;i<list.size();i++){
             swapped = false;
-            for(int j=0;j<tasks.size()-1;j++){
-                if(tasks.get(j).getPriorityID()>tasks.get(j+1).getPriorityID()){
+            for(int j=0;j<list.size()-1;j++){
+                if(list.get(j).getPriorityID()>list.get(j+1).getPriorityID()){
                     // swap tasks
-                    Task temp = tasks.get(j);
-                    tasks.set(j,tasks.get(j+1));
-                    tasks.set(j+1,temp);
+                    Task temp = list.get(j);
+                    list.set(j,list.get(j+1));
+                    list.set(j+1,temp);
                     swapped = true;
                 }
             }
@@ -220,6 +213,7 @@ public class List {
             if (!swapped)
                 break;
         }
+        return list;
     }
     
     // search
