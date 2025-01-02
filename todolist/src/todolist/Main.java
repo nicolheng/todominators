@@ -264,7 +264,7 @@ public class Main extends Application {
 
     private void showCreate(Stage parentStage, TableView<Task> tableView) {
         System.out.println("Add task button clicked.");
-    
+        
         // Create UI elements for the task creation form
         Label titleLabel = new Label("Enter Task Title:");
         TextField titleField = new TextField();
@@ -308,6 +308,18 @@ public class Main extends Application {
         recurringComboBox.setMaxWidth(300);
         VBox.setMargin(recurringComboBox, new Insets(0, 0, 10, 20));
     
+        // Set task dependency using ComboBox (Modified)
+        Label dependencyLabel = new Label("Select Task Dependency:");
+        ComboBox<Task> dependencyComboBox = new ComboBox<>();
+        ObservableList<Task> tasks = Database.getTasksFromDatabase();  // Get list of tasks from the database or any data source
+    
+
+        // Populate ComboBox with task objects
+        dependencyComboBox.getItems().addAll(tasks);
+        dependencyComboBox.setPromptText("Select Task to Depend On");
+        dependencyComboBox.setMaxWidth(300);
+        VBox.setMargin(dependencyComboBox, new Insets(0, 0, 10, 20));
+    
         // Add Task button
         Button addTaskButton = new Button("Add Task");
         VBox.setMargin(addTaskButton, new Insets(20, 0, 0, 300)); // Fixed margin to center the button
@@ -321,6 +333,8 @@ public class Main extends Application {
             String selectedCategory = categoryComboBox.getValue();
             String selectedPriority = priorityComboBox.getValue();
             String selectedRecurring = recurringComboBox.getValue();
+            Task selectedDependencyTask = dependencyComboBox.getValue(); // This is the selected Task object
+            String selectedDependencyTaskName = selectedDependencyTask != null ? selectedDependencyTask.getName() : "None";
     
             // Validate input
             if (title == null || title.trim().isEmpty()) {
@@ -351,9 +365,21 @@ public class Main extends Application {
             if (selectedRecurring == null) {
                 selectedRecurring = "None"; // Default value if recurring is not selected
             }
-    
-            // Call the taskCreate method, passing the recurring value as well
+
+
+            // Call the taskCreate method to create the task
             Task.taskCreate(title, description, dueDate, selectedCategory, selectedPriority, selectedRecurring);
+            
+            List newTask = new List();
+            // After task creation, get the ID of the newly created task
+            int newTaskId = newTask.getTaskId(title);
+    
+            // If a dependency is selected and it is not "None", create the dependency
+            if (selectedDependencyTask != null) {
+                int selectedDependencyId = newTask.getTaskId(selectedDependencyTaskName);
+                Task taskWithDependency = new Task();
+                taskWithDependency.taskDependency(newTaskId, selectedDependencyId); // Create dependency
+            }
     
             // Refresh the parent TableView
             tableView.setItems(Database.getTasksFromDatabase());
@@ -374,11 +400,12 @@ public class Main extends Application {
             categoryLabel, categoryComboBox,
             priorityLabel, priorityComboBox,
             recurringLabel, recurringComboBox,
+            dependencyLabel, dependencyComboBox,
             addTaskButton);
         layout.setPadding(new Insets(15));
     
         // Scene and Stage setup
-        Scene scene = new Scene(layout, 400, 500);
+        Scene scene = new Scene(layout, 400, 650);
         Stage addTaskStage = new Stage();
         addTaskStage.setTitle("Add Task");
         addTaskStage.setScene(scene);
@@ -386,6 +413,7 @@ public class Main extends Application {
         addTaskStage.initOwner(parentStage); // Set parent stage
         addTaskStage.showAndWait();
     }
+    
     
     
     private void showAnalytics() {

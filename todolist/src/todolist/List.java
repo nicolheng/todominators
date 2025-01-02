@@ -236,6 +236,14 @@ public class List {
     return null;
     }
 
+    public int getTaskId(String n) {
+        for (Task task : tasks) {
+        if (task.getName().equals(n))
+            return task.getID();
+        }
+    return -1;
+    }
+
     public ArrayList<Task> getList(){
         return tasks;
     }
