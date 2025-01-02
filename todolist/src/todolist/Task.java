@@ -7,7 +7,7 @@ import javafx.scene.control.Button;
 import todolistgui.Database1;
 
 public class Task {
-    private String name, description, category,priorityName;
+    private String name, description, category, priorityName;
     private LocalDate dueDate;
     private boolean isCompleted;
     private int id, priorityID, recurringID;
@@ -99,7 +99,7 @@ public class Task {
     }
 
     public int getID(){
-        return this.id;
+        return id;
     }
 
     public String getDescription(){
@@ -374,6 +374,11 @@ public class Task {
     //recurring id = 1 when there is no recurring
     public boolean taskRecurringCheck(){
         return (getRecurringID() != 1);
+    }
+
+    @Override
+    public String toString() {
+        return this.getName(); // Assuming 'getName()' returns the task title
     }
 
     public static void main(String[] args) {
