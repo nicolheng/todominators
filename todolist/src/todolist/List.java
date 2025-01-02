@@ -217,25 +217,16 @@ public class List {
     }
     
     // search
-    public void listSearch(){
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter a keyword to search by title or description: ");
-        String keyword = sc.nextLine();
-        int cnt =0;
-        boolean found = false;
-        for (int i=0;i<tasks.size();i++){
-            if(tasks.get(i).getName().toLowerCase().contains(keyword)||tasks.get(i).getDescription().toLowerCase().contains(keyword)){
-                cnt++;
-                found = true;
-                System.out.print(cnt + ". " + "[" + tasks.get(i).getIsCompleted() + "] ");
-                System.out.println(tasks.get(i).getName() + " - ");
-                System.out.println("Due: " + tasks.get(i).getDueDate());
-                System.out.println("Category: " + tasks.get(i).getCategory());
-                System.out.println("Priority: " + tasks.get(i).getPriorityName());
-            }
-    }
-        if(!found)
-            System.out.println("No task found for " + keyword);
+    public static ArrayList<Task> listSearch(String query){
+        ArrayList<Task> matchSearch = new ArrayList<>();
+        String keyword = query.toLowerCase();
+        for (Task task : tasks){
+            if(task.getName().toLowerCase().contains(keyword)||task.getDescription().toLowerCase().contains(keyword))
+                matchSearch.add(task);
+        }
+        for (Task result : matchSearch)
+            System.out.println(result);
+        return matchSearch;
     }
 
     public String getTaskName(int x) {

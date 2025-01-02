@@ -32,12 +32,12 @@ public class Main extends Application {
         
         TextField searchBar = new TextField();
         searchBar.setPromptText("Search Task");
-        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
 
         ObservableList<String> items = FXCollections.observableArrayList("Due Date Ascending", "Due Date Descending", "Priority (High to Low)", "Priority (Low to High)");
         ComboBox<String> sortDropdown = new ComboBox<>(items);
         sortDropdown.setItems(items);
         sortDropdown.setValue("Due Date Ascending");
+
         TableView tableView = new TableView();
         
         TableColumn<Task, String> column1 = new TableColumn<>("Name");
@@ -60,7 +60,7 @@ public class Main extends Application {
         tableView.getColumns().add(column1);
         tableView.getColumns().add(column2);
         tableView.getColumns().add(column3);
-        tableView.getColumns().add(column4);                                                                            
+        tableView.getColumns().add(column4);
         List tasks = new List();
         ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
 
@@ -69,7 +69,13 @@ public class Main extends Application {
         // Top section: Search bar and sorting dropdown
         HBox topBar = new HBox(10);
         topBar.setPadding(new Insets(10));
-        
+
+        searchBar.setOnKeyReleased(event -> {
+            if (searchBar.getText() != null){
+                ObservableList<Task> searchResult = taskSearch(searchBar.getText());
+                tableView.setItems(searchResult);
+            }
+        });
         sortDropdown.setOnAction(event -> tableView.setItems(sortTasks(sortDropdown.getValue())));
 
         topBar.getChildren().addAll(searchBar, sortDropdown);
@@ -119,9 +125,12 @@ public class Main extends Application {
     }
 
     // Placeholder methods for functionality
-    private void taskSearch(String query) {
+    private ObservableList<Task> taskSearch(String query) {
         System.out.println("Search query: " + query);
         // Implement search functionality here
+        ArrayList <Task> searched = List.listSearch(query);
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(searched);
+        return tasksDisplay;
     }
 
     private ObservableList<Task> sortTasks(String criteria) {
