@@ -12,18 +12,16 @@ package todolist;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
+import javafx.scene.Node;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -60,7 +58,7 @@ public class Main extends Application {
         column3.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
 
         TableColumn<Task, String> column4 = new TableColumn<>("Action");
-        column4.setCellValueFactory(new PropertyValueFactory<>("button"));
+        column4.setCellFactory(col -> new buttonCell());
 
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.getColumns().add(column1);
@@ -109,20 +107,10 @@ public class Main extends Application {
 
         bottomBar.getChildren().addAll(analysisButton, addTaskButton, promptEmailButton);
 
-        // Floating Add Button
-        StackPane addButtonPane = new StackPane();
-        Button addButton = new Button("+");
-        addButton.setStyle("-fx-font-size: 20px; -fx-background-radius: 50%;");
-        addButton.setOnAction(event -> showCreate(primaryStage, tableView));
-        addButtonPane.getChildren().add(addButton);
-        StackPane.setAlignment(addButton, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(addButton, new Insets(10));
-
         // Assemble layout
         root.setTop(topBar);
         root.setCenter(taskDisplayArea);
         root.setBottom(bottomBar);
-        root.getChildren().add(addButtonPane);
 
         // Scene setup
         Scene scene = new Scene(root, 400, 600);
@@ -157,8 +145,123 @@ public class Main extends Application {
         return tasksDisplay;
 
     }
+    private class buttonCell extends javafx.scene.control.TableCell<Task, String> {
+        private final Button button = new Button("Detail");
 
+        public buttonCell() {
+            button.setOnAction(event -> {
+                Task task = getTableView().getItems().get(getIndex());
+                showEdit(task, event);
+            });
+        }
+
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setGraphic(null);
+            } else {
+                setGraphic(button);
+            }
+        }
+    }
+
+    private void showEdit(Task task, ActionEvent event1) {
+        BorderPane root = new BorderPane();
+        System.out.println("Edit task button clicked.");
     
+        // Create UI elements for editing the task
+        Label titleLabel = new Label("Enter Task Title:");
+        TextField titleField = new TextField(task.getName());
+    
+        Label descriptionLabel = new Label("Enter Task Description:");
+        TextField descriptionField = new TextField(task.getDescription());
+    
+        Label dueDateLabel = new Label("Enter Due Date:");
+        DatePicker dueDatePicker = new DatePicker(task.getDueDate());
+    
+        Label categoryLabel = new Label("Select Category:");
+        ComboBox<String> categoryComboBox = new ComboBox<>();
+        categoryComboBox.getItems().addAll("Homework", "Personal", "Work");
+        categoryComboBox.setValue(task.getCategory());
+    
+        Label priorityLabel = new Label("Select Priority:");
+        ComboBox<String> priorityComboBox = new ComboBox<>();
+        priorityComboBox.getItems().addAll("Low", "Medium", "High");
+        priorityComboBox.setValue(task.getPriorityName());
+    
+        Label recurringLabel = new Label("Select Recurring:");
+        ComboBox<String> recurringComboBox = new ComboBox<>();
+        recurringComboBox.getItems().addAll("None", "Daily", "Weekly", "Monthly");
+        recurringComboBox.setValue(task.getRecurringName());
+    
+        // Bottom buttons
+        HBox bottomBar = new HBox(10);
+        bottomBar.setAlignment(Pos.CENTER);
+        Button deleteButton = new Button("Delete");
+        Button saveButton = new Button("Save Changes");
+        bottomBar.getChildren().addAll(deleteButton, saveButton);
+    
+        // Event handler for Save button
+        saveButton.setOnAction(event -> {
+            String title = titleField.getText();
+            String description = descriptionField.getText();
+            LocalDate dueDate = dueDatePicker.getValue();
+            String selectedCategory = categoryComboBox.getValue();
+            String selectedPriority = priorityComboBox.getValue();
+            String selectedRecurring = recurringComboBox.getValue();
+    
+            // Validation
+            if (title == null || title.trim().isEmpty()) {
+                showAlert("Task title cannot be empty.");
+                return;
+            }
+            if (description == null || description.trim().isEmpty()) {
+                showAlert("Task description cannot be empty.");
+                return;
+            }
+            if (dueDate == null) {
+                showAlert("Please select a due date.");
+                return;
+            }
+            if (selectedCategory == null) {
+                showAlert("Please select a category.");
+                return;
+            }
+            if (selectedPriority == null) {
+                showAlert("Please select a priority.");
+                return;
+            }
+    
+            // Update task and refresh TableView
+            task.taskEdit();
+    
+            // Close the window
+            ((Stage) saveButton.getScene().getWindow()).close();
+        });
+    
+        // Event handler for Delete button
+        deleteButton.setOnAction(event -> {
+            task.taskDelete();
+            ((Stage) deleteButton.getScene().getWindow()).close();
+        });
+    
+        // Layout setup
+        VBox layout = new VBox(10, titleLabel, titleField, descriptionLabel, descriptionField,
+                dueDateLabel, dueDatePicker, categoryLabel, categoryComboBox,
+                priorityLabel, priorityComboBox, recurringLabel, recurringComboBox, bottomBar);
+        layout.setPadding(new Insets(15));
+    
+        // Scene and Stage setup
+        Scene scene = new Scene(layout, 400, 500);
+        Stage editStage = new Stage();
+        editStage.setTitle("Edit Task");
+        editStage.setScene(scene);
+        editStage.initModality(Modality.APPLICATION_MODAL);
+        editStage.initOwner(((Node)event1.getSource()).getScene().getWindow());
+        editStage.showAndWait();
+    }
+
     private void showCreate(Stage parentStage, TableView<Task> tableView) {
         System.out.println("Add task button clicked.");
     

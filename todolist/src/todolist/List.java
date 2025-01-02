@@ -1,7 +1,6 @@
 package todolist;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

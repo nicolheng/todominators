@@ -2,20 +2,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Task",
-            "request": "launch",
-            "mainClass": "todolist.Task",
-            "projectName": "todominators_20537e37"
-        },
-        {
-            "type": "java",
-            "name": "List",
-            "request": "launch",
-            "mainClass": "todolist.List",
-            "projectName": "todominators_20537e37"
-        },
-        {
-            "type": "java",
             "name": "todolist",
             "request": "launch",
             "mainClass": "todolist.Main",

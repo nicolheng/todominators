@@ -76,7 +76,7 @@ public class Database {
             System.out.println("Error fetching tasks: " + e.getMessage());
         }
         return tasks;
-}
+    }
 
     
 }

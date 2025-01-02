@@ -4,10 +4,9 @@ import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
 import javafx.scene.control.Button;
-import todolistgui.Database1;
 
 public class Task {
-    private String name, description, category,priorityName;
+    private String name, description, category,priorityName, recurringName;
     private LocalDate dueDate;
     private boolean isCompleted;
     private int id, priorityID, recurringID;
@@ -31,8 +30,8 @@ public class Task {
         this.category = category;
         this.priorityID = priorityID;
         this.priorityName = setPriorityName(priorityID);
+        this.recurringName = setRecurringName(recurringID);
         this.recurringID = recurringID;
-        this.button = new Button("Detail");
     }
 
     public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurringID){
@@ -83,6 +82,23 @@ public class Task {
                 return "High";
             default:
                 return "Unknown";
+        }
+    }
+
+    public String getRecurringName(){
+        return recurringName;
+    }
+
+    private String setRecurringName(int recurringID){
+        switch(recurringID){
+            case 1:
+                return "None";
+            case 2:
+                return "Daily";
+            case 3:
+                return "Weekly";
+            default:
+                return "Monthly";
         }
     }
 
