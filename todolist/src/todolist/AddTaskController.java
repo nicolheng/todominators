@@ -1,4 +1,4 @@
-package todolistgui;
+package todolist;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -100,16 +100,8 @@ public class AddTaskController {
     }
 
     // Database insertion logic
-    try {
-        String query = "INSERT INTO tasks (task_name, task_description, task_due_date, task_category, task_priority) " +
-                       "VALUES (?, ?, ?, ?, ?)";
-        Database1.executeUpdate(query, title, description, dueDate.toString(), selectedCategory, selectedPriority);
-        showAlert("Task added successfully!");
-        clearFields();
-    } catch (Exception e) {
-        e.printStackTrace();
-        showAlert("Error adding task: " + e.getMessage());
-    }
+    Task.taskCreate(title, description, dueDate.toString(), selectedCategory, selectedPriority);
+    clearFields();
 }
         
     private void clearFields() {
