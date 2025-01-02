@@ -12,15 +12,21 @@ package todolist;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
 
 public class Main extends Application {
 
@@ -94,13 +100,13 @@ public class Main extends Application {
         Button analysisButton = new Button("Analytics");
         analysisButton.setOnAction(event -> showAnalytics());
 
-        Button taskButton = new Button("Add Task");
-        taskButton.setOnAction(event -> showCreate());
+        Button addTaskButton = new Button("Add Task");
+        addTaskButton.setOnAction(event -> showCreate());
 
         Button promptEmailButton = new Button("Prompt Email");
         promptEmailButton.setOnAction(event -> promptEmail());
 
-        bottomBar.getChildren().addAll(analysisButton, taskButton, promptEmailButton);
+        bottomBar.getChildren().addAll(analysisButton, addTaskButton, promptEmailButton);
 
         // Floating Add Button
         StackPane addButtonPane = new StackPane();
@@ -154,6 +160,22 @@ public class Main extends Application {
     private void showCreate() {
         System.out.println("Add task button clicked.");
         // Implement task addition functionality here
+        try {
+            // Load the FXML file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/addTask.fxml"));
+            Parent root = loader.load();
+
+            // Create a new scene and stage
+            Scene addTaskScene = new Scene(root);
+            Stage addTaskStage = new Stage();
+            addTaskStage.setTitle("Add Task");
+            addTaskStage.setScene(addTaskScene);
+            addTaskStage.initModality(Modality.APPLICATION_MODAL); // Makes it modal
+            addTaskStage.showAndWait(); // Wait for this stage to close
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Failed to load the Add Task view: " + e.getMessage());
+        }
     }
 
     private void showAnalytics() {
@@ -179,7 +201,14 @@ public class Main extends Application {
         // Implement email prompting functionality here
     }
 
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
+
 }

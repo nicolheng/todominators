@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
 import javafx.scene.control.Button;
+import todolistgui.Database1;
 
 public class Task {
     private String name, description, category,priorityName;
@@ -122,8 +123,24 @@ public class Task {
         return button;
     }
 
-    public static void taskCreate() {
+    public static void taskCreate(String title, String description, String dueDate, String category, String priority) {
+        int priorityID = 0;
+        switch (priority) {
+            case "High":
+                priorityID = 3;
+                break;
+            case "Medium":
+                priorityID = 2;
+                break;
+            case "Low":
+                priorityID = 1;
+                break;
+        }
 
+        String query = "INSERT INTO tasks (task_name, task_description, task_due_date, task_category, task_priorityID) " + "VALUES (?, ?, ?, ?, ?)";
+        Database.executeUpdate(query, title, description, dueDate, category, priorityID);
+        System.out.println();
+        System.out.println("Task \"" + title + "\" added successfully!");
     }
 
     public void taskComplete(int taskId) {
