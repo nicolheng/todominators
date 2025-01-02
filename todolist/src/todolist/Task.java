@@ -24,6 +24,16 @@ public class Task {
         dc_isCompleted = new ArrayList<>();
     }
 
+    public Task(String name, String description, LocalDate dueDate, String category, int priorityID, int recurringID){
+        this.name = name;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.category = category;
+        this.priorityID = priorityID;
+        this.priorityName = setPriorityName(priorityID);
+        this.recurringID = recurringID;
+    }
+
     public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurringID){
         this.id = id;
         this.name = name;
@@ -34,7 +44,7 @@ public class Task {
         this.priorityName = setPriorityName(priorityID);
         this.isCompleted= isCompleted;
         this.recurringID = recurringID;
-        this.button = new Button("Detail");                                                                         
+        this.button = new Button("Detail");
     }
 
     public void setName(String name){
@@ -123,7 +133,7 @@ public class Task {
         return button;
     }
 
-    public static void taskCreate(String title, String description, String dueDate, String category, String priority) {
+    public static void taskCreate(String title, String description, LocalDate dueDate, String category, String priority, String recurrString) {
         int priorityID = 0;
         switch (priority) {
             case "High":
@@ -136,9 +146,27 @@ public class Task {
                 priorityID = 1;
                 break;
         }
+        int recurringID = 0;
+        switch (recurrString) {
+            case "Monthly":
+                recurringID = 4;
+                break;
+            case "Weekly":
+                recurringID = 3;
+                break;
+            case "Daily":
+                recurringID = 2;
+                break;
+            case "None":
+            default:
+                recurringID = 1;
+                break;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String formattedDate = dueDate.format(formatter);
 
-        String query = "INSERT INTO tasks (task_name, task_description, task_due_date, task_category, task_priorityID) " + "VALUES (?, ?, ?, ?, ?)";
-        Database.executeUpdate(query, title, description, dueDate, category, priorityID);
+        String query = "INSERT INTO tasks (task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) " + "VALUES (?, ?, ?, ?, ?, ?)";
+        Database.executeUpdate(query, title, description, formattedDate, category, priorityID, recurringID);
         System.out.println();
         System.out.println("Task \"" + title + "\" added successfully!");
     }

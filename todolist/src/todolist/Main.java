@@ -67,6 +67,7 @@ public class Main extends Application {
         tableView.getColumns().add(column2);
         tableView.getColumns().add(column3);
         tableView.getColumns().add(column4);
+        
         List tasks = new List();
         ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
 
@@ -101,7 +102,7 @@ public class Main extends Application {
         analysisButton.setOnAction(event -> showAnalytics());
 
         Button addTaskButton = new Button("Add Task");
-        addTaskButton.setOnAction(event -> showCreate());
+        addTaskButton.setOnAction(event -> showCreate(primaryStage, tableView));
 
         Button promptEmailButton = new Button("Prompt Email");
         promptEmailButton.setOnAction(event -> promptEmail());
@@ -112,7 +113,7 @@ public class Main extends Application {
         StackPane addButtonPane = new StackPane();
         Button addButton = new Button("+");
         addButton.setStyle("-fx-font-size: 20px; -fx-background-radius: 50%;");
-        addButton.setOnAction(event -> showCreate());
+        addButton.setOnAction(event -> showCreate(primaryStage, tableView));
         addButtonPane.getChildren().add(addButton);
         StackPane.setAlignment(addButton, Pos.BOTTOM_RIGHT);
         StackPane.setMargin(addButton, new Insets(10));
@@ -157,27 +158,127 @@ public class Main extends Application {
 
     }
 
-    private void showCreate() {
+    
+    private void showCreate(Stage parentStage, TableView<Task> tableView) {
         System.out.println("Add task button clicked.");
-        // Implement task addition functionality here
-        try {
-            // Load the FXML file
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/addTask.fxml"));
-            Parent root = loader.load();
-
-            // Create a new scene and stage
-            Scene addTaskScene = new Scene(root);
-            Stage addTaskStage = new Stage();
-            addTaskStage.setTitle("Add Task");
-            addTaskStage.setScene(addTaskScene);
-            addTaskStage.initModality(Modality.APPLICATION_MODAL); // Makes it modal
-            addTaskStage.showAndWait(); // Wait for this stage to close
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Failed to load the Add Task view: " + e.getMessage());
-        }
+    
+        // Create UI elements for the task creation form
+        TextField titleField = new TextField();
+        titleField.setPromptText("Enter task title");
+        titleField.setMaxWidth(300);
+        VBox.setMargin(titleField, new Insets(0, 0, 10, 20));
+    
+        TextField descriptionField = new TextField();
+        descriptionField.setPromptText("Enter task description");
+        descriptionField.setMaxWidth(300);
+        VBox.setMargin(descriptionField, new Insets(0, 0, 10, 20));
+    
+        DatePicker dueDatePicker = new DatePicker();
+        dueDatePicker.setPromptText("Select due date");
+        dueDatePicker.setMaxWidth(300);
+        VBox.setMargin(dueDatePicker, new Insets(0, 0, 10, 20));
+    
+        // Category selection using ComboBox
+        Label categoryLabel = new Label("Select Category:");
+        ComboBox<String> categoryComboBox = new ComboBox<>();
+        categoryComboBox.getItems().addAll("Homework", "Personal", "Work");
+        categoryComboBox.setPromptText("Select Category");
+        categoryComboBox.setMaxWidth(300);
+        VBox.setMargin(categoryComboBox, new Insets(0, 0, 10, 20));
+    
+        // Priority selection using ComboBox
+        Label priorityLabel = new Label("Select Priority:");
+        ComboBox<String> priorityComboBox = new ComboBox<>();
+        priorityComboBox.getItems().addAll("Low", "Medium", "High");
+        priorityComboBox.setPromptText("Select Priority");
+        priorityComboBox.setMaxWidth(300);
+        VBox.setMargin(priorityComboBox, new Insets(0, 0, 10, 20));
+    
+        // Recurring task selection using ComboBox
+        Label recurringLabel = new Label("Select Recurring:");
+        ComboBox<String> recurringComboBox = new ComboBox<>();
+        recurringComboBox.getItems().addAll("None", "Daily", "Weekly", "Monthly");
+        recurringComboBox.setPromptText("Select Recurring");
+        recurringComboBox.setMaxWidth(300);
+        VBox.setMargin(recurringComboBox, new Insets(0, 0, 10, 20));
+    
+        // Add Task button
+        Button addTaskButton = new Button("Add Task");
+        VBox.setMargin(addTaskButton, new Insets(20, 0, 0, 300)); // Fixed margin to center the button
+    
+        // Event handler for the Add Task button
+        addTaskButton.setOnAction(event -> {
+            // Retrieve input values
+            String title = titleField.getText();
+            String description = descriptionField.getText();
+            LocalDate dueDate = dueDatePicker.getValue();
+            String selectedCategory = categoryComboBox.getValue();
+            String selectedPriority = priorityComboBox.getValue();
+            String selectedRecurring = recurringComboBox.getValue();
+    
+            // Validate input
+            if (title == null || title.trim().isEmpty()) {
+                showAlert("Task title cannot be empty.");
+                return;
+            }
+    
+            if (description == null || description.trim().isEmpty()) {
+                showAlert("Task description cannot be empty.");
+                return;
+            }
+    
+            if (dueDate == null) {
+                showAlert("Please select a due date.");
+                return;
+            }
+    
+            if (selectedCategory == null) {
+                showAlert("Please select a category.");
+                return;
+            }
+    
+            if (selectedPriority == null) {
+                showAlert("Please select a priority.");
+                return;
+            }
+    
+            if (selectedRecurring == null) {
+                selectedRecurring = "None"; // Default value if recurring is not selected
+            }
+    
+            // Call the taskCreate method, passing the recurring value as well
+            Task.taskCreate(title, description, dueDate, selectedCategory, selectedPriority, selectedRecurring);
+    
+            // Refresh the parent TableView
+            tableView.setItems(Database.getTasksFromDatabase());
+    
+            // Close the window after adding the task
+            Stage stage = (Stage) addTaskButton.getScene().getWindow();
+            stage.close();
+        });
+    
+        // Layout setup
+        VBox layout = new VBox(10,
+            titleField,
+            descriptionField,
+            dueDatePicker,
+            categoryLabel, categoryComboBox,
+            priorityLabel, priorityComboBox,
+            recurringLabel, recurringComboBox,
+            addTaskButton);
+        layout.setPadding(new Insets(15));
+    
+        // Scene and Stage setup
+        Scene scene = new Scene(layout, 400, 450);
+        Stage addTaskStage = new Stage();
+        addTaskStage.setTitle("Add Task");
+        addTaskStage.setScene(scene);
+        addTaskStage.initModality(Modality.APPLICATION_MODAL); // Make it modal
+        addTaskStage.initOwner(parentStage); // Set parent stage
+        addTaskStage.showAndWait();
     }
-
+    
+    
     private void showAnalytics() {
         System.out.println("Analysis button clicked.");
         Stage analytics = new Stage();
@@ -193,10 +294,10 @@ public class Main extends Application {
 
     private void promptEmail() {
         System.out.println("Prompt email button clicked.");
-        TextInputDialog td = new TextInputDialog(); 
+        TextInputDialog td = new TextInputDialog();
         td.setHeaderText("enter your email");
         td.showAndWait();
-        String email = td.getEditor().getText(); 
+        String email = td.getEditor().getText();
         Email.startEmail(email);
         // Implement email prompting functionality here
     }
