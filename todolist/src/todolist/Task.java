@@ -32,6 +32,7 @@ public class Task {
         this.priorityID = priorityID;
         this.priorityName = setPriorityName(priorityID);
         this.recurringID = recurringID;
+        this.button = new Button("Detail");
     }
 
     public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurringID){

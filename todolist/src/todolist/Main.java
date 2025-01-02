@@ -163,16 +163,19 @@ public class Main extends Application {
         System.out.println("Add task button clicked.");
     
         // Create UI elements for the task creation form
+        Label titleLabel = new Label("Enter Task Title:");
         TextField titleField = new TextField();
         titleField.setPromptText("Enter task title");
         titleField.setMaxWidth(300);
         VBox.setMargin(titleField, new Insets(0, 0, 10, 20));
     
+        Label descriptionLabel = new Label("Enter Task Description:");
         TextField descriptionField = new TextField();
         descriptionField.setPromptText("Enter task description");
         descriptionField.setMaxWidth(300);
         VBox.setMargin(descriptionField, new Insets(0, 0, 10, 20));
     
+        Label duedateLabel = new Label("Enter Due Date:");
         DatePicker dueDatePicker = new DatePicker();
         dueDatePicker.setPromptText("Select due date");
         dueDatePicker.setMaxWidth(300);
@@ -259,8 +262,11 @@ public class Main extends Application {
     
         // Layout setup
         VBox layout = new VBox(10,
+            titleLabel,
             titleField,
+            descriptionLabel,
             descriptionField,
+            duedateLabel,
             dueDatePicker,
             categoryLabel, categoryComboBox,
             priorityLabel, priorityComboBox,
@@ -269,7 +275,7 @@ public class Main extends Application {
         layout.setPadding(new Insets(15));
     
         // Scene and Stage setup
-        Scene scene = new Scene(layout, 400, 450);
+        Scene scene = new Scene(layout, 400, 500);
         Stage addTaskStage = new Stage();
         addTaskStage.setTitle("Add Task");
         addTaskStage.setScene(scene);
