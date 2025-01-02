@@ -38,7 +38,7 @@ public class EditTaskController {
     public void loadTaskDetails(int taskId) {
     task task = Database1.getTaskById(taskId);  // Fetch the task by ID
     DatePicker editDueDate=new DatePicker();
-    LocalDate dueDate=task.getDueDate();.
+    LocalDate dueDate=task.getDueDate();
     if (task != null) {
         // Populate UI elements with the task data (e.g., TextFields)
         editTitleField.setText(task.getTitle());

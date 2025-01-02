@@ -97,6 +97,6 @@ public class Email {
                     System.out.println("Error occurs: " + e.getMessage());
                 }
             }
-        }, 1, 1, TimeUnit.MINUTES);
+        }, 1, 1440, TimeUnit.MINUTES);
     }
 }

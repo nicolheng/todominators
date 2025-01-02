@@ -8,14 +8,169 @@ package todolist;
  *
  * @author User
  */
-public class Main {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-       
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+public class Main extends Application {
+
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Root layout
+        BorderPane root = new BorderPane();
+        
+        TextField searchBar = new TextField();
+        searchBar.setPromptText("Search Task");
+        searchBar.setOnKeyReleased(event -> taskSearch(searchBar.getText()));
+
+        ObservableList<String> items = FXCollections.observableArrayList("Due Date Ascending", "Due Date Descending", "Priority (High to Low)", "Priority (Low to High)");
+        ComboBox<String> sortDropdown = new ComboBox<>(items);
+        sortDropdown.setItems(items);
+        sortDropdown.setValue("Due Date Ascending");
+        TableView tableView = new TableView();
+        
+        TableColumn<Task, String> column1 = new TableColumn<>("Name");
+
+        column1.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+
+        TableColumn<Task, LocalDate> column2 = new TableColumn<>("Due date");
+
+        column2.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
+
+        TableColumn<Task, String> column3 = new TableColumn<>("Priority");
+
+        column3.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
+
+        TableColumn<Task, String> column4 = new TableColumn<>("Action");
+        column4.setCellValueFactory(new PropertyValueFactory<>("button"));
+
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableView.getColumns().add(column1);
+        tableView.getColumns().add(column2);
+        tableView.getColumns().add(column3);
+        tableView.getColumns().add(column4);                                                                            
+        List tasks = new List();
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
+
+        tableView.setItems(sortTasks("Due Date Ascending"));
+
+        // Top section: Search bar and sorting dropdown
+        HBox topBar = new HBox(10);
+        topBar.setPadding(new Insets(10));
+        
+        sortDropdown.setOnAction(event -> tableView.setItems(sortTasks(sortDropdown.getValue())));
+
+        topBar.getChildren().addAll(searchBar, sortDropdown);
+        topBar.setAlignment(Pos.CENTER);
+
+        // Center section: Task display area
+        VBox taskDisplayArea = new VBox(tableView);
+        taskDisplayArea.setPadding(new Insets(10));
+        taskDisplayArea.setSpacing(10);
+
+        // Bottom section: Buttons
+        HBox bottomBar = new HBox(10);
+        bottomBar.setPadding(new Insets(10));
+        bottomBar.setAlignment(Pos.CENTER);
+
+        Button analysisButton = new Button("Analytics");
+        analysisButton.setOnAction(event -> showAnalytics());
+
+        Button taskButton = new Button("Add Task");
+        taskButton.setOnAction(event -> showCreate());
+
+        Button promptEmailButton = new Button("Prompt Email");
+        promptEmailButton.setOnAction(event -> promptEmail());
+
+        bottomBar.getChildren().addAll(analysisButton, taskButton, promptEmailButton);
+
+        // Floating Add Button
+        StackPane addButtonPane = new StackPane();
+        Button addButton = new Button("+");
+        addButton.setStyle("-fx-font-size: 20px; -fx-background-radius: 50%;");
+        addButton.setOnAction(event -> showCreate());
+        addButtonPane.getChildren().add(addButton);
+        StackPane.setAlignment(addButton, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(addButton, new Insets(10));
+
+        // Assemble layout
+        root.setTop(topBar);
+        root.setCenter(taskDisplayArea);
+        root.setBottom(bottomBar);
+        root.getChildren().add(addButtonPane);
+
+        // Scene setup
+        Scene scene = new Scene(root, 400, 600);
+        primaryStage.setTitle("Task Management App");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
-    
+
+    // Placeholder methods for functionality
+    private void taskSearch(String query) {
+        System.out.println("Search query: " + query);
+        // Implement search functionality here
+    }
+
+    private ObservableList<Task> sortTasks(String criteria) {
+        System.out.println("Sorting by: " + criteria);
+        // Implement sorting functionality here
+        int choiceInt;
+        if (criteria.equals("Due Date Ascending"))
+            choiceInt = 1;
+        else if (criteria.equals("Due Date Descending"))
+            choiceInt = 2;
+        else if (criteria.equals("Priority (High to Low)"))
+            choiceInt = 3;
+        else
+            choiceInt = 4;
+        ArrayList <Task> sorted = List.listSort(choiceInt);
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(sorted);
+        return tasksDisplay;
+
+    }
+
+    private void showCreate() {
+        System.out.println("Add task button clicked.");
+        // Implement task addition functionality here
+    }
+
+    private void showAnalytics() {
+        System.out.println("Analysis button clicked.");
+        Stage analytics = new Stage();
+        String output = List.listAnalytics();
+        Label label = new Label(output);
+        StackPane analyticsLayout = new StackPane(label);
+        analyticsLayout.setStyle("-fx-padding: 20px;");
+        Scene analyticsScene = new Scene(analyticsLayout, 250, 300);
+        analytics.setTitle("Analytics");
+        analytics.setScene(analyticsScene);
+        analytics.showAndWait();
+    }
+
+    private void promptEmail() {
+        System.out.println("Prompt email button clicked.");
+        TextInputDialog td = new TextInputDialog(); 
+        td.setHeaderText("enter your email");
+        td.showAndWait();
+        String email = td.getEditor().getText(); 
+        Email.startEmail(email);
+        // Implement email prompting functionality here
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
