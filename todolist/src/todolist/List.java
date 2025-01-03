@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 public class List {
     private static ArrayList <Task> tasks;
 
-    public List(){ //taskload here
+    public static ArrayList <Task> listLoad(){
         tasks = new ArrayList<>();
         String query = "SELECT * FROM tasks";
         try (Connection conn = Database.getConnection();
@@ -37,6 +37,7 @@ public class List {
         catch (SQLException e){
             System.out.println("Error occurs: " + e.getMessage());
         }
+        return tasks;
     }
 
     public static String listAnalytics(){

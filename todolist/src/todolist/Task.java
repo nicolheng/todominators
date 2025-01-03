@@ -3,7 +3,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
-import javafx.scene.control.Button;
 
 public class Task {
     private String name, description, category,priorityName, recurringName;
@@ -14,7 +13,6 @@ public class Task {
     private ArrayList<Integer> dc_taskId, dc_taskDependsId;
     private ArrayList<Boolean> dc_isCompleted;
     private Map<Integer, Integer> dependencyMap;
-    private Button button;
     
     public Task() {
         dc_taskDependsName = new ArrayList<>();
@@ -44,7 +42,7 @@ public class Task {
         this.priorityName = setPriorityName(priorityID);
         this.isCompleted= isCompleted;
         this.recurringID = recurringID;
-        this.button = new Button("Detail");
+        this.recurringName = setRecurringName(recurringID);
     }
 
     public void setName(String name){
@@ -89,7 +87,7 @@ public class Task {
         return recurringName;
     }
 
-    private String setRecurringName(int recurringID){
+    public String setRecurringName(int recurringID){
         switch(recurringID){
             case 1:
                 return "None";
@@ -115,7 +113,7 @@ public class Task {
     }
 
     public int getID(){
-        return id;
+        return this.id;
     }
 
     public String getDescription(){
@@ -140,14 +138,6 @@ public class Task {
 
     public int getRecurringID(){
         return this.recurringID;
-    }
-
-    public void setButton (Button button){
-        this.button = button;
-    }
-
-    public Button getButton(){
-        return button;
     }
 
     public static void taskCreate(String title, String description, LocalDate dueDate, String category, String priority, String recurrString) {
@@ -191,8 +181,8 @@ public class Task {
     public void taskComplete(int taskId) {
         // Check if task has dependencies that are not completed
         String query1 = "SELECT td.depends_on_task_id, t.task_name, t.is_completed " +
-                        "FROM task_dependencies td " +
-                        "JOIN tasks t ON td.depends_on_task_id = t.task_id " +
+                        "FROM task_dependencies AS td " +
+                        "JOIN tasks AS t ON td.depends_on_task_id = t.task_id " +
                         "WHERE td.task_id = " + taskId;
         if (taskRecurringCheck()){
             taskRecurring();
@@ -217,7 +207,9 @@ public class Task {
                 dc_taskDependsId.add(rs.getInt("depends_on_task_id"));
                 dc_isCompleted.add(rs.getBoolean("is_completed"));
             }
-
+            if (dc_taskDependsName == null) {
+                return true;
+            }
         } catch (SQLException e) {
             System.out.println("Error occurs. " + e.getMessage());
         }
@@ -282,12 +274,15 @@ public class Task {
             String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             switch (this.recurringID) {
                 case 2:
+                    System.out.println(2);
                     newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 case 3:
+                    System.out.println(3);
                     newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 case 4:
+                    System.out.println(4);
                     newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 default:
@@ -395,15 +390,5 @@ public class Task {
     @Override
     public String toString() {
         return this.getName(); // Assuming 'getName()' returns the task title
-    }
-
-    public static void main(String[] args) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String date = "26-12-2024";
-      
-        //convert String to LocalDate
-        LocalDate localDate = LocalDate.parse(date, formatter);
-        Task test = new Task(4, "FOP tutorial","tutorial",localDate ,"Homework", false, 3, 3);
-        test.taskDelete();
     }
 }
