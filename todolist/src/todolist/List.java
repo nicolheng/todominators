@@ -1,7 +1,6 @@
 package todolist;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -9,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 public class List {
     private static ArrayList <Task> tasks;
 
-    public List(){ //taskload here
+    public static ArrayList <Task> listLoad(){
         tasks = new ArrayList<>();
         String query = "SELECT * FROM tasks";
         try (Connection conn = Database.getConnection();
@@ -28,16 +27,24 @@ public class List {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 LocalDate dueDate = LocalDate.parse(sqlDate, formatter);
                 int priorityID = rs.getInt("task_priorityID");
-                boolean isCompleted = rs.getBoolean("is_completed");
+                System.out.println(rs.getBoolean("is_completed"));
+                if (rs.wasNull()){
+                    System.out.println("cb");
+                }
+                Boolean isCompleted = rs.getBoolean("is_completed");
                 int recurringID = rs.getInt("task_recurringID");
                 
                 Task task = new Task(id,name,description,dueDate,category,isCompleted,priorityID,recurringID);
                 tasks.add(task);
             }
+            for (Task task : tasks) {
+                System.out.println(task.getName() + " - " + task.getIsCompleted());
+            }
         }
         catch (SQLException e){
             System.out.println("Error occurs: " + e.getMessage());
         }
+        return tasks;
     }
 
     public static String listAnalytics(){

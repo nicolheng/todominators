@@ -10,27 +10,26 @@ package todolist;
  */
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
+import javafx.scene.Node;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
+import java.sql.*;
 
 public class Main extends Application {
 
-
+    public TableView tableView = new TableView();
     @Override
     public void start(Stage primaryStage) {
         // Root layout
@@ -43,34 +42,38 @@ public class Main extends Application {
         ComboBox<String> sortDropdown = new ComboBox<>(items);
         sortDropdown.setItems(items);
         sortDropdown.setValue("Due Date Ascending");
-
-        TableView tableView = new TableView();
         
-        TableColumn<Task, String> column1 = new TableColumn<>("Name");
+        TableColumn<Task, String> columnName = new TableColumn<>("Name");
+        columnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        column1.setCellValueFactory(new PropertyValueFactory<>("name"));
 
+        TableColumn<Task, LocalDate> columnDescription = new TableColumn<>("Due date");
+        columnDescription.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
 
-        TableColumn<Task, LocalDate> column2 = new TableColumn<>("Due date");
+        TableColumn<Task, String> columnPriority = new TableColumn<>("Priority");
+        columnPriority.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
 
-        column2.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
-
-        TableColumn<Task, String> column3 = new TableColumn<>("Priority");
-
-        column3.setCellValueFactory(new PropertyValueFactory<>("priorityName"));
-
-        TableColumn<Task, String> column4 = new TableColumn<>("Action");
-        column4.setCellValueFactory(new PropertyValueFactory<>("button"));
-
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        tableView.getColumns().add(column1);
-        tableView.getColumns().add(column2);
-        tableView.getColumns().add(column3);
-        tableView.getColumns().add(column4);
+        TableColumn<Task, Boolean> columnStatus = new TableColumn<>("Status");
+        columnStatus.setCellValueFactory(new PropertyValueFactory<>("isCompleted"));
+        columnStatus.setCellFactory(col -> new TableCell<Task, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                System.out.println("updateItem called for Status column: item=" + item + ", empty=" + empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Completed" : "Incomplete");
+                }
+            }
+        });
+        TableColumn<Task, String> columnAction = new TableColumn<>("Action");
+        columnAction.setCellFactory(col -> new buttonCell());
+    
+        tableView.getColumns().addAll(columnName,columnDescription,columnPriority,columnStatus,columnAction);
         
-        List tasks = new List();
-        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(tasks.getList());
-
+        ObservableList<Task> tasksDisplay = FXCollections.observableArrayList(List.listLoad());
+        
         tableView.setItems(sortTasks("Due Date Ascending"));
 
         // Top section: Search bar and sorting dropdown
@@ -109,23 +112,13 @@ public class Main extends Application {
 
         bottomBar.getChildren().addAll(analysisButton, addTaskButton, promptEmailButton);
 
-        // Floating Add Button
-        StackPane addButtonPane = new StackPane();
-        Button addButton = new Button("+");
-        addButton.setStyle("-fx-font-size: 20px; -fx-background-radius: 50%;");
-        addButton.setOnAction(event -> showCreate(primaryStage, tableView));
-        addButtonPane.getChildren().add(addButton);
-        StackPane.setAlignment(addButton, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(addButton, new Insets(10));
-
         // Assemble layout
         root.setTop(topBar);
         root.setCenter(taskDisplayArea);
         root.setBottom(bottomBar);
-        root.getChildren().add(addButtonPane);
 
         // Scene setup
-        Scene scene = new Scene(root, 400, 600);
+        Scene scene = new Scene(root, 400, 500);
         primaryStage.setTitle("Task Management App");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -157,8 +150,202 @@ public class Main extends Application {
         return tasksDisplay;
 
     }
+    class buttonCell extends javafx.scene.control.TableCell<Task, String> {
+        private final Button button = new Button("Detail");
 
+        public buttonCell() {
+            button.setOnAction(event -> {
+                Task task = getTableView().getItems().get(getIndex());
+                showEdit(task, event);
+            });
+        }
+
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setGraphic(null);
+            } else {
+                setGraphic(button);
+            }
+        }
+    }
+
+    private void showEdit(Task task, ActionEvent event1) {
+        BorderPane root = new BorderPane();
+        System.out.println("Edit task button clicked.");
     
+        // Create UI elements for editing the task
+        Label titleLabel = new Label("Enter Task Title:");
+        TextField titleField = new TextField(task.getName());
+        titleField.setMaxWidth(300);
+        VBox.setMargin(titleField, new Insets(0, 0, 10, 20));
+    
+        Label descriptionLabel = new Label("Enter Task Description:");
+        TextField descriptionField = new TextField(task.getDescription());
+        descriptionField.setMaxWidth(300);
+        VBox.setMargin(descriptionField, new Insets(0, 0, 10, 20));
+    
+        Label dueDateLabel = new Label("Enter Due Date:");
+        DatePicker dueDatePicker = new DatePicker(task.getDueDate());
+        dueDatePicker.setMaxWidth(300);
+        VBox.setMargin(dueDatePicker, new Insets(0, 0, 10, 20));
+    
+        Label categoryLabel = new Label("Select Category:");
+        ComboBox<String> categoryComboBox = new ComboBox<>();
+        categoryComboBox.getItems().addAll("Homework", "Personal", "Work");
+        categoryComboBox.setValue(task.getCategory());
+        categoryComboBox.setMaxWidth(300);
+        VBox.setMargin(categoryComboBox, new Insets(0, 0, 10, 20));
+    
+        Label priorityLabel = new Label("Select Priority:");
+        ComboBox<String> priorityComboBox = new ComboBox<>();
+        priorityComboBox.getItems().addAll("Low", "Medium", "High");
+        priorityComboBox.setValue(task.getPriorityName());
+        priorityComboBox.setMaxWidth(300);
+        VBox.setMargin(priorityComboBox, new Insets(0, 0, 10, 20));
+    
+        Label recurringLabel = new Label("Select Recurring:");
+        ComboBox<String> recurringComboBox = new ComboBox<>();
+        recurringComboBox.getItems().addAll("None", "Daily", "Weekly", "Monthly");
+        recurringComboBox.setValue(task.getRecurringName());
+        recurringComboBox.setMaxWidth(300);
+        VBox.setMargin(recurringComboBox, new Insets(0, 0, 10, 20));
+    
+        // Set task dependency using ComboBox (Modified)
+        Label dependencyLabel = new Label("Select Task Dependency:");
+        ComboBox<Task> dependencyComboBox = new ComboBox<>();
+        ObservableList<Task> tasks = FXCollections.observableArrayList(List.listLoad());  // Get list of tasks from the database or any data source
+        // Populate ComboBox with task objects
+        dependencyComboBox.getItems().addAll(tasks);
+        dependencyComboBox.setPromptText("Select Task to Depend On");
+        String query = "SELECT depends_on_task_id FROM task_dependencies WHERE task_id = "+task.getID();
+        try (Connection conn = Database.getConnection()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            if (rs.next()){
+                int id = rs.getInt("depends_on_task_id");
+                for (Task x: tasks){
+                    if (x.getID() == id) {
+                        dependencyComboBox.setValue(x);
+                        break;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error occurs. " + e.getMessage());
+        }
+        dependencyComboBox.setMaxWidth(300);
+        VBox.setMargin(dependencyComboBox, new Insets(0, 0, 10, 20));
+
+        // Bottom buttons
+        HBox bottomBar = new HBox(10);
+        bottomBar.setAlignment(Pos.CENTER);
+        Button deleteButton = new Button("Delete");
+        VBox.setMargin(deleteButton, new Insets(20, 0, 0, 300));
+        Button saveButton = new Button("Save Changes");
+        VBox.setMargin(saveButton, new Insets(20, 0, 0, 300));
+        Button completeButton = new Button("Complete");
+        VBox.setMargin(saveButton, new Insets(20, 0, 0, 300));
+        bottomBar.getChildren().addAll(deleteButton, saveButton, completeButton);
+        
+        // Layout setup
+        VBox layout = new VBox(10, titleLabel, titleField, descriptionLabel, descriptionField,
+                dueDateLabel, dueDatePicker, categoryLabel, categoryComboBox,
+                priorityLabel, priorityComboBox, recurringLabel, recurringComboBox, dependencyLabel, dependencyComboBox, bottomBar);
+        layout.setPadding(new Insets(15));
+
+        // Event handler for Save button
+        saveButton.setOnAction(event -> {
+            // Retrieve input values
+            String title = titleField.getText();
+            String description = descriptionField.getText();
+            LocalDate dueDate = dueDatePicker.getValue();
+            String selectedCategory = categoryComboBox.getValue();
+            String selectedPriority = priorityComboBox.getValue();
+            String selectedRecurring = recurringComboBox.getValue();
+            Task selectedDependencyTask = dependencyComboBox.getValue(); // This is the selected Task object
+            String selectedDependencyTaskName = selectedDependencyTask != null ? selectedDependencyTask.getName() : "None";
+    
+            // Validate input
+            if (title == null || title.trim().isEmpty()) {
+                showAlert("Task title cannot be empty.");
+                return;
+            }
+    
+            if (description == null || description.trim().isEmpty()) {
+                showAlert("Task description cannot be empty.");
+                return;
+            }
+    
+            if (dueDate == null) {
+                showAlert("Please select a due date.");
+                return;
+            }
+    
+            if (selectedCategory == null) {
+                showAlert("Please select a category.");
+                return;
+            }
+    
+            if (selectedPriority == null) {
+                showAlert("Please select a priority.");
+                return;
+            }
+    
+            if (selectedRecurring == null) {
+                selectedRecurring = "None"; // Default value if recurring is not selected
+            }
+            
+            List newTask = new List();
+            // After task creation, get the ID of the newly created task
+            int newTaskId = newTask.getTaskId(title);
+    
+            // If a dependency is selected and it is not "None", create the dependency
+            if (selectedDependencyTask != null) {
+                int selectedDependencyId = newTask.getTaskId(selectedDependencyTaskName);
+                String success = Task.taskDependency(newTaskId, selectedDependencyId); // Create dependency
+                if (success != null) {
+                    showAlert(success);
+                }
+            }
+            Task.taskEdit(title, description, dueDate, selectedCategory, selectedPriority, selectedRecurring, task.getID());
+            showAlert("Task is edited successfully!");
+            tableView.setItems(FXCollections.observableArrayList(List.listLoad()));
+            // Close the window
+            ((Stage) saveButton.getScene().getWindow()).close();
+        });
+    
+        // Event handler for Delete button
+        deleteButton.setOnAction(event -> {
+            task.taskDelete();
+            tableView.setItems(FXCollections.observableArrayList(List.listLoad()));
+            ((Stage) deleteButton.getScene().getWindow()).close();
+        });
+
+        completeButton.setOnAction(event -> {
+            Task dependency = dependencyComboBox.getValue();
+            Boolean completeCheck = task.taskComplete(task.getID());
+            System.out.println("test");
+            if (!completeCheck){
+                System.out.println("yesss");
+                showAlert("Warning: Task \"" + task.getName() + "\" cannot be marked as complete because it depends on \"" +
+                        dependency.getName() + "\". Please complete\"" + dependency.getName() + "\" first.");
+            }
+            tableView.setItems(FXCollections.observableArrayList(List.listLoad()));
+            ((Stage) completeButton.getScene().getWindow()).close();
+        });
+    
+        // Scene and Stage setup
+        Scene scene = new Scene(layout, 400, 600);
+        Stage editStage = new Stage();
+        editStage.setTitle("Edit Task");
+        editStage.setScene(scene);
+        editStage.initModality(Modality.APPLICATION_MODAL);
+        editStage.initOwner(((Node)event1.getSource()).getScene().getWindow());
+        editStage.showAndWait();
+    }
+
     private void showCreate(Stage parentStage, TableView<Task> tableView) {
         System.out.println("Add task button clicked.");
         
@@ -208,7 +395,7 @@ public class Main extends Application {
         // Set task dependency using ComboBox (Modified)
         Label dependencyLabel = new Label("Select Task Dependency:");
         ComboBox<Task> dependencyComboBox = new ComboBox<>();
-        ObservableList<Task> tasks = Database.getTasksFromDatabase();  // Get list of tasks from the database or any data source
+        ObservableList<Task> tasks = FXCollections.observableArrayList(List.listLoad());  // Get list of tasks from the database or any data source
     
 
         // Populate ComboBox with task objects
@@ -274,12 +461,11 @@ public class Main extends Application {
             // If a dependency is selected and it is not "None", create the dependency
             if (selectedDependencyTask != null) {
                 int selectedDependencyId = newTask.getTaskId(selectedDependencyTaskName);
-                Task taskWithDependency = new Task();
-                taskWithDependency.taskDependency(newTaskId, selectedDependencyId); // Create dependency
+                String success = Task.taskDependency(newTaskId, selectedDependencyId); // Create dependency
             }
     
             // Refresh the parent TableView
-            tableView.setItems(Database.getTasksFromDatabase());
+            tableView.setItems(FXCollections.observableArrayList(List.listLoad()));
     
             // Close the window after adding the task
             Stage stage = (Stage) addTaskButton.getScene().getWindow();
@@ -329,7 +515,7 @@ public class Main extends Application {
     private void promptEmail() {
         System.out.println("Prompt email button clicked.");
         TextInputDialog td = new TextInputDialog();
-        td.setHeaderText("enter your email");
+        td.setHeaderText("Enter your email");
         td.showAndWait();
         String email = td.getEditor().getText();
         Email.startEmail(email);
@@ -339,6 +525,7 @@ public class Main extends Application {
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         alert.showAndWait();
     }
 
