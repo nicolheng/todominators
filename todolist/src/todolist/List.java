@@ -49,16 +49,16 @@ public class List {
     completed_tasks_cte AS (
         SELECT COUNT(*) AS completed_tasks
         FROM tasks
-        WHERE LOWER(is_completed) = 'true'
+        WHERE is_completed = 1
     ),
     pending_tasks_cte AS (
         SELECT COUNT(*) AS pending_tasks
         FROM tasks
-        WHERE LOWER(is_completed) = 'false'
+        WHERE is_completed = 0
     ),
     completion_rate_cte AS (
-        SELECT 
-            printf('%.2f%%', (COUNT(*) FILTER (WHERE LOWER(is_completed) = 'true') * 100.0 / COUNT(*))) AS completion_rate
+        SELECT
+            printf('%.2f%%', (COUNT(*) FILTER (WHERE is_completed = 1) * 100.0 / COUNT(*))) AS completion_rate
         FROM tasks
     )
     SELECT 'Total Tasks' AS metric, total_tasks AS value FROM total_tasks_cte
