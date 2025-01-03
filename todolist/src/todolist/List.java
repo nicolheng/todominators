@@ -8,9 +8,9 @@ import java.time.format.DateTimeFormatter;
 public class List {
     private static ArrayList <Task> tasks;
 
-    public static ArrayList <Task> listLoad(){
+    public static void listLoad(){
         tasks = new ArrayList<>();
-        String query = "SELECT * FROM tasks";
+        String query = "SELECT * FROM tasks;";
         try (Connection conn = Database.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);) {
@@ -27,24 +27,16 @@ public class List {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 LocalDate dueDate = LocalDate.parse(sqlDate, formatter);
                 int priorityID = rs.getInt("task_priorityID");
-                System.out.println(rs.getBoolean("is_completed"));
-                if (rs.wasNull()){
-                    System.out.println("cb");
-                }
                 Boolean isCompleted = rs.getBoolean("is_completed");
                 int recurringID = rs.getInt("task_recurringID");
                 
                 Task task = new Task(id,name,description,dueDate,category,isCompleted,priorityID,recurringID);
                 tasks.add(task);
             }
-            for (Task task : tasks) {
-                System.out.println(task.getName() + " - " + task.getIsCompleted());
-            }
         }
         catch (SQLException e){
             System.out.println("Error occurs: " + e.getMessage());
         }
-        return tasks;
     }
 
     public static String listAnalytics(){
@@ -252,7 +244,7 @@ public class List {
     return -1;
     }
 
-    public ArrayList<Task> getList(){
+    public static ArrayList<Task> getList(){
         return tasks;
     }
     //debugging purpose

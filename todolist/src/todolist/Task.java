@@ -3,7 +3,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
-import javafx.beans.property.SimpleBooleanProperty;
 
 public class Task {
     private String name, description, category,priorityName, recurringName;
