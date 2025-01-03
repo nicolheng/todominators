@@ -27,11 +27,18 @@ public class List {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 LocalDate dueDate = LocalDate.parse(sqlDate, formatter);
                 int priorityID = rs.getInt("task_priorityID");
-                boolean isCompleted = rs.getBoolean("is_completed");
+                System.out.println(rs.getBoolean("is_completed"));
+                if (rs.wasNull()){
+                    System.out.println("cb");
+                }
+                Boolean isCompleted = rs.getBoolean("is_completed");
                 int recurringID = rs.getInt("task_recurringID");
                 
                 Task task = new Task(id,name,description,dueDate,category,isCompleted,priorityID,recurringID);
                 tasks.add(task);
+            }
+            for (Task task : tasks) {
+                System.out.println(task.getName() + " - " + task.getIsCompleted());
             }
         }
         catch (SQLException e){

@@ -1,10 +1,5 @@
 package todolist;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class Database {
     private static String url = "jdbc:sqlite:tasks.db";

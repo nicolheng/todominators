@@ -3,36 +3,19 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.sql.*;
 import java.util.*;
+import javafx.beans.property.SimpleBooleanProperty;
 
 public class Task {
     private String name, description, category,priorityName, recurringName;
     private LocalDate dueDate;
-    private boolean isCompleted;
+    private Boolean isCompleted;
     private int id, priorityID, recurringID;
-    private ArrayList<String> dc_taskDependsName;
-    private ArrayList<Integer> dc_taskId, dc_taskDependsId;
-    private ArrayList<Boolean> dc_isCompleted;
-    private Map<Integer, Integer> dependencyMap;
-    
-    public Task() {
-        dc_taskDependsName = new ArrayList<>();
-        dc_taskId = new ArrayList<>();
-        dc_taskDependsId = new ArrayList<>();
-        dc_isCompleted = new ArrayList<>();
-    }
+    static ArrayList<String> dc_taskDependsName;
+    static ArrayList<Integer> dc_taskId, dc_taskDependsId;
+    static ArrayList<Boolean> dc_isCompleted;
+    static Map<Integer, Integer> dependencyMap;
 
-    public Task(String name, String description, LocalDate dueDate, String category, int priorityID, int recurringID){
-        this.name = name;
-        this.description = description;
-        this.dueDate = dueDate;
-        this.category = category;
-        this.priorityID = priorityID;
-        this.priorityName = setPriorityName(priorityID);
-        this.recurringName = setRecurringName(recurringID);
-        this.recurringID = recurringID;
-    }
-
-    public Task(int id, String name, String description, LocalDate dueDate, String category, boolean isCompleted, int priorityID, int recurringID){
+    public Task(int id, String name, String description, LocalDate dueDate, String category, Boolean isCompleted, int priorityID, int recurringID){
         this.id = id;
         this.name = name;
         this.description = description;
@@ -128,7 +111,7 @@ public class Task {
         return this.category;
     }
 
-    public boolean getIsCompleted(){
+    public Boolean getIsCompleted(){
         return this.isCompleted;
     }
 
@@ -153,7 +136,7 @@ public class Task {
                 priorityID = 1;
                 break;
         }
-        int recurringID = 0;
+        int recurringID = 1;
         switch (recurrString) {
             case "Monthly":
                 recurringID = 4;
@@ -164,7 +147,6 @@ public class Task {
             case "Daily":
                 recurringID = 2;
                 break;
-            case "None":
             default:
                 recurringID = 1;
                 break;
@@ -178,36 +160,45 @@ public class Task {
         System.out.println("Task \"" + title + "\" added successfully!");
     }
 
-    public void taskComplete(int taskId) {
+    public boolean taskComplete(int taskId) {
+        dc_taskDependsName = new ArrayList<>();
+        dc_taskId = new ArrayList<>();
+        dc_taskDependsId = new ArrayList<>();
+        dc_isCompleted = new ArrayList<>();
         // Check if task has dependencies that are not completed
         String query1 = "SELECT td.depends_on_task_id, t.task_name, t.is_completed " +
-                        "FROM task_dependencies AS td " +
-                        "JOIN tasks AS t ON td.depends_on_task_id = t.task_id " +
-                        "WHERE td.task_id = " + taskId;
-        if (taskRecurringCheck()){
-            taskRecurring();
-        }
+                        "FROM task_dependencies td " +
+                        "JOIN tasks t ON td.depends_on_task_id = t.task_id " +
+                        "WHERE td.task_id = ?";
         // If no dependencies or all dependencies are completed, mark task as completed
         String query2 = "UPDATE tasks SET is_completed = TRUE WHERE task_id = " + taskId;
         
         List l = new List();
-        if (taskCompleteCheck(query1, l.getTaskName(taskId)))
-            if (Database.executeUpdate(query2))
+        if (taskCompleteCheck(query1, l.getTaskName(taskId), taskId)) {
+            if (Database.executeUpdate(query2)) {
                 System.out.println("Task \"" + l.getTaskName(taskId) + "\" marked as complete!");
-        
-        System.out.println();
+            }
+        }
+        else {
+            return false;
+        }
+        if (taskRecurringCheck()){
+            taskRecurring();
+        }
+        return true;
     }
         
-    private boolean taskCompleteCheck(String query, String n) {
+    private boolean taskCompleteCheck(String query, String n, int taskId) {
         try (Connection conn = Database.getConnection();
-            Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query);){
-
+            var stmt = conn.prepareStatement(query);){
+            stmt.setInt(1, taskId);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 dc_taskDependsName.add(rs.getString("task_name"));
                 dc_taskDependsId.add(rs.getInt("depends_on_task_id"));
                 dc_isCompleted.add(rs.getBoolean("is_completed"));
             }
-            if (dc_taskDependsName == null) {
+            if (dc_taskDependsName.isEmpty()) {
                 return true;
             }
         } catch (SQLException e) {
@@ -215,21 +206,65 @@ public class Task {
         }
             
         boolean dependencyDone = true;
-        for (int i = 0; i < dc_isCompleted.size(); i++)
+        for (int i = 0; i < dc_isCompleted.size(); i++) {
             if (!dc_isCompleted.get(i)) {
                 dependencyDone = false;
                 System.out.println("Warning: Task \"" + n + "\" cannot be marked as complete because it depends on \"" +
                         dc_taskDependsName.get(i) + "\". Please complete \"" + dc_taskDependsName.get(i) + "\" first.");
                 break;
             }
+        }
         dc_taskDependsName.clear();
         dc_taskDependsId.clear();
         dc_isCompleted.clear();
         return dependencyDone;
     }
     
-    public void taskEdit(){
-
+    public static void taskEdit(String title, String description, LocalDate dueDate, String category, String priority, String recurrString, int id){
+        int priorityID = 0;
+        switch (priority) {
+            case "High":
+                priorityID = 3;
+                break;
+            case "Medium":
+                priorityID = 2;
+                break;
+            case "Low":
+                priorityID = 1;
+                break;
+        }
+        int recurringID = 1;
+        switch (recurrString) {
+            case "Monthly":
+                recurringID = 4;
+                break;
+            case "Weekly":
+                recurringID = 3;
+                break;
+            case "Daily":
+                recurringID = 2;
+                break;
+            default:
+                recurringID = 1;
+                break;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String formattedDate = dueDate.format(formatter);
+        String query = "UPDATE tasks SET task_name = ?, task_description = ?, task_due_date = ?, task_category = ?, task_priorityID = ?, task_recurringID = ? WHERE task_id = ?";
+        try (Connection conn = Database.getConnection();
+            var stmt = conn.prepareStatement(query);){
+                stmt.setString(1, title);
+                stmt.setString(2, description);
+                stmt.setString(3, formattedDate);
+                stmt.setString(4, category);
+                stmt.setInt(5, priorityID);
+                stmt.setInt(6, recurringID);
+                stmt.setInt(7, id);
+                stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error occurs: " + e.getMessage());
+        }
+    
     }
 
     public void taskDelete(){
@@ -249,20 +284,23 @@ public class Task {
     }
 
     
-    public void taskDependency(int taskId, int dependsOnTaskId){
+    public static String taskDependency(int taskId, int dependsOnTaskId){
+        dc_taskDependsName = new ArrayList<>();
+        dc_taskId = new ArrayList<>();
+        dc_taskDependsId = new ArrayList<>();
+        dc_isCompleted = new ArrayList<>();
         String query1 = "SELECT task_id, depends_on_task_id FROM task_dependencies";
         List l = new List();
+        String msg = null;
         if (taskDependencyCheck(query1, taskId, dependsOnTaskId)){
-            System.out.println("Warning: Task \"" + l.getTaskName(taskId) + "\" cannot depends on \"" + l.getTaskName(dependsOnTaskId) + "\" because it will cause a loop. ");
+            msg = "Warning: Task \"" + l.getTaskName(taskId) + "\" cannot depends on \"" + l.getTaskName(dependsOnTaskId) + "\" because it will cause a loop. ";
         }
         else {
             String query2 = "INSERT INTO task_dependencies (task_id, depends_on_task_id) VALUES (" + taskId + ", " + dependsOnTaskId + ")";
-            if (Database.executeUpdate(query2))
-                System.out.println("Task \"" + l.getTaskName(taskId) + "\" now depends on \"" + l.getTaskName(dependsOnTaskId) + "\".");
-            else
-                System.out.println("Task \"" + l.getTaskName(taskId) + "\" already depends on \"" + l.getTaskName(dependsOnTaskId) + "\".");
+            if (!Database.executeUpdate(query2))
+                msg = "Task \"" + l.getTaskName(taskId) + "\" already depends on \"" + l.getTaskName(dependsOnTaskId) + "\".";
         }
-        System.out.println();
+        return msg;
     }
 
     //recurring concept: create a task with same detail but different due date
@@ -274,18 +312,19 @@ public class Task {
             String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
             switch (this.recurringID) {
                 case 2:
-                    System.out.println(2);
+                    System.out.println("Recurring daily (2)");
                     newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 case 3:
-                    System.out.println(3);
+                    System.out.println("Recurring weekly (3)");
                     newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 case 4:
-                    System.out.println(4);
+                    System.out.println("Recurring monthly (4)");
                     newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     break;
                 default:
+                    System.out.println("No recurring (default case)");
                     break;
             }
             stmt.setString(3, newDate);
@@ -300,8 +339,9 @@ public class Task {
     }
 
     //check for loop dependencies/existing dependencies
-    public boolean taskDependencyCheck(String query, int x, int y) {
-
+    public static boolean taskDependencyCheck(String query, int x, int y) {
+        dc_taskId = new ArrayList<>();
+        dc_taskDependsId = new ArrayList<>();
         try (Connection conn = Database.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query)) {
@@ -350,36 +390,6 @@ public class Task {
         dc_taskDependsId.clear();
         dependencyMap.clear();
         return false; // No cycle detected
-    }
-
-    // Helper method to validate task IDs
-    public int getValidTaskId(Scanner sc, String prompt) {
-        int taskID;
-        System.out.print(prompt);
-        taskID = sc.nextInt();
-        while (!taskExist(taskID)) {
-            System.out.println("Task number entered does not exist. Please enter a valid value.");
-            System.out.print(prompt);
-            taskID = sc.nextInt();
-        }
-        return taskID;
-    }
-
-    public boolean taskExist(int x){
-        String query = "SELECT task_id from tasks";
-        try (Connection conn = Database.getConnection();
-            Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query);){
-            while (rs.next()) {
-                dc_taskId.add(rs.getInt("task_id"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error occurs. " + e.getMessage());
-        }
-        int max = dc_taskId.size();
-        dc_taskId.clear();
-        if (x > max)
-            return false;
-        return true;
     }
 
     //recurring id = 1 when there is no recurring
