@@ -88,6 +88,7 @@ public class Task {
 
     public void setRecurringID (int recurringID) {
         this.recurringID = recurringID;
+        this.recurringName = setRecurringName(recurringID);
     }
 
     public String getName(){
@@ -305,7 +306,8 @@ public class Task {
     //recurring concept: create a task with same detail but different due date
     public void taskRecurring(){
         try (Connection conn = Database.getConnection();
-            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
+            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, " +
+                                "task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
             stmt.setString(1, this.name);
             stmt.setString(2, this.description);
             String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
@@ -352,11 +354,9 @@ public class Task {
             System.out.println("Error occurs. " + e.getMessage());
         }
     
-        // Check if taskId is empty before proceeding
         if (dc_taskId.isEmpty() || dc_taskDependsId.isEmpty())
-            return false; // No dependencies to check
-    
-        // Continue with the existing logic...
+            return false;
+
         dependencyMap = new HashMap<>();
         for (int i = 0; i < dc_taskId.size(); i++) {
             dependencyMap.put(dc_taskId.get(i), dc_taskDependsId.get(i)); // Maps task -> depends_on_task
@@ -369,15 +369,14 @@ public class Task {
             int fast = startTask;
     
             while (dependencyMap.containsKey(fast)) {
-                slow = dependencyMap.get(slow); // Move slow one step
-                fast = dependencyMap.get(fast); // Move fast one step
+                slow = dependencyMap.get(slow);
+                fast = dependencyMap.get(fast);
                 if (dependencyMap.containsKey(fast)) {
-                    fast = dependencyMap.get(fast); // Move fast a second step
+                    fast = dependencyMap.get(fast);
                 } else {
                     break; // Fast pointer reached the end
                 }
     
-                // Check if slow and fast meet
                 if (slow == fast) {
                     System.out.println("Cycle detected in dependencies.");
                     return true;
@@ -388,7 +387,7 @@ public class Task {
         dc_taskId.clear();
         dc_taskDependsId.clear();
         dependencyMap.clear();
-        return false; // No cycle detected
+        return false;
     }
 
     //recurring id = 1 when there is no recurring
