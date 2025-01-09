@@ -81,6 +81,8 @@ public class Main extends Application {
                 ObservableList<Task> searchResult = taskSearch(searchBar.getText());
                 tableView.setItems(searchResult);
             }
+            tableView.refresh();
+        
         });
         sortDropdown.setOnAction(event -> tableView.setItems(sortTasks(sortDropdown.getValue())));
 
