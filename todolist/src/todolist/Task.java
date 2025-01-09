@@ -42,14 +42,14 @@ public class Task {
     public void setCategory(String category) {
         this.category = category;
     }
+    
+    public void setIsCompleted (boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
 
     public void setPriorityID(int priorityID) {
         this.priorityID = priorityID;
         this.priorityName = setPriorityName(priorityID);
-    }
-    
-    public String getPriorityName(){
-        return priorityName;
     }
 
     private String setPriorityName(int priorityID){
@@ -65,8 +65,9 @@ public class Task {
         }
     }
 
-    public String getRecurringName(){
-        return recurringName;
+    public void setRecurringID (int recurringID) {
+        this.recurringID = recurringID;
+        this.recurringName = setRecurringName(recurringID);
     }
 
     public String setRecurringName(int recurringID){
@@ -82,21 +83,12 @@ public class Task {
         }
     }
 
-    public void setIsCompleted (boolean isCompleted) {
-        this.isCompleted = isCompleted;
-    }
-
-    public void setRecurringID (int recurringID) {
-        this.recurringID = recurringID;
-        this.recurringName = setRecurringName(recurringID);
+    public int getID(){
+        return this.id;
     }
 
     public String getName(){
         return this.name;
-    }
-
-    public int getID(){
-        return this.id;
     }
 
     public String getDescription(){
@@ -121,6 +113,14 @@ public class Task {
 
     public int getRecurringID(){
         return this.recurringID;
+    }
+
+    public String getPriorityName(){
+        return priorityName;
+    }
+
+    public String getRecurringName(){
+        return recurringName;
     }
 
     public static void taskCreate(String title, String description, LocalDate dueDate, String category, String priority, String recurrString) {
@@ -303,42 +303,6 @@ public class Task {
         return msg;
     }
 
-    //recurring concept: create a task with same detail but different due date
-    public void taskRecurring(){
-        try (Connection conn = Database.getConnection();
-            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, " +
-                                "task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
-            stmt.setString(1, this.name);
-            stmt.setString(2, this.description);
-            String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-            switch (this.recurringID) {
-                case 2:
-                    System.out.println("Recurring daily (2)");
-                    newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    break;
-                case 3:
-                    System.out.println("Recurring weekly (3)");
-                    newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    break;
-                case 4:
-                    System.out.println("Recurring monthly (4)");
-                    newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    break;
-                default:
-                    System.out.println("No recurring (default case)");
-                    break;
-            }
-            stmt.setString(3, newDate);
-            stmt.setString(4, this.category);
-            stmt.setInt(5, this.priorityID);
-            stmt.setInt(6, this.recurringID);
-            stmt.executeUpdate();
-
-        } catch (SQLException e){
-            System.out.println("Error occurs: " + e.getMessage());
-        }
-    }
-
     //check for loop dependencies/existing dependencies
     public static boolean taskDependencyCheck(String query, int x, int y) {
         dc_taskId = new ArrayList<>();
@@ -388,6 +352,42 @@ public class Task {
         dc_taskDependsId.clear();
         dependencyMap.clear();
         return false;
+    }
+    
+    //recurring concept: create a task with same detail but different due date
+    public void taskRecurring(){
+        try (Connection conn = Database.getConnection();
+            var stmt = conn.prepareStatement("INSERT INTO tasks(task_name, task_description, task_due_date, " +
+                                "task_category, task_priorityID, task_recurringID) VALUES(?,?,?,?,?,?)");){
+            stmt.setString(1, this.name);
+            stmt.setString(2, this.description);
+            String newDate = this.dueDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            switch (this.recurringID) {
+                case 2:
+                    System.out.println("Recurring daily (2)");
+                    newDate = this.dueDate.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                case 3:
+                    System.out.println("Recurring weekly (3)");
+                    newDate = this.dueDate.plusDays(7).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                case 4:
+                    System.out.println("Recurring monthly (4)");
+                    newDate = this.dueDate.plusMonths(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    break;
+                default:
+                    System.out.println("No recurring (default case)");
+                    break;
+            }
+            stmt.setString(3, newDate);
+            stmt.setString(4, this.category);
+            stmt.setInt(5, this.priorityID);
+            stmt.setInt(6, this.recurringID);
+            stmt.executeUpdate();
+
+        } catch (SQLException e){
+            System.out.println("Error occurs: " + e.getMessage());
+        }
     }
 
     //recurring id = 1 when there is no recurring

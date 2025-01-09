@@ -39,78 +39,6 @@ public class List {
         }
     }
 
-    public static String listAnalytics(){
-        String metricsQuery = """
-    WITH 
-    total_tasks_cte AS (
-        SELECT COUNT(*) AS total_tasks
-        FROM tasks
-    ),
-    completed_tasks_cte AS (
-        SELECT COUNT(*) AS completed_tasks
-        FROM tasks
-        WHERE is_completed = 1
-    ),
-    pending_tasks_cte AS (
-        SELECT COUNT(*) AS pending_tasks
-        FROM tasks
-        WHERE is_completed = 0
-    ),
-    completion_rate_cte AS (
-        SELECT
-            printf('%.2f%%', (COUNT(*) FILTER (WHERE is_completed = 1) * 100.0 / COUNT(*))) AS completion_rate
-        FROM tasks
-    )
-    SELECT 'Total Tasks' AS metric, total_tasks AS value FROM total_tasks_cte
-    UNION ALL
-    SELECT 'Completed Tasks', completed_tasks FROM completed_tasks_cte
-    UNION ALL
-    SELECT 'Pending Tasks', pending_tasks FROM pending_tasks_cte
-    UNION ALL
-    SELECT 'Completion Rate', completion_rate FROM completion_rate_cte
-    """;
-
-
-        // SQL query to calculate task category counts
-        String categoriesQuery = """
-            SELECT task_category, COUNT(*) AS task_count
-            FROM tasks
-            GROUP BY task_category
-            ORDER BY task_count DESC
-            """;
-
-        String  output = "" ;
-        try (Connection conn = Database.getConnection()) {
-            // Execute and display task metrics
-            try (PreparedStatement stmt = conn.prepareStatement(metricsQuery);
-                 ResultSet rs = stmt.executeQuery()) {
-
-                output += "Task Metrics:\n";
-                while (rs.next()) {
-                    output += rs.getString("metric") + ": " + rs.getString("value") + "\n";
-                }
-            }
-
-            // Execute and display task categories
-            try (PreparedStatement stmt = conn.prepareStatement(categoriesQuery);
-                 ResultSet rs = stmt.executeQuery()) {
-
-                output += "\nTask Categories:\n";
-                while (rs.next()) {
-                    output += rs.getString("task_category") + ": " + rs.getInt("task_count") +"\n";
-                }
-            }
-            
-
-        } catch (SQLException e) {
-            // Handle SQLException
-            System.err.println("An error occurred while accessing the database: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return output;
-
-    }
-
     // sort
     public static ArrayList<Task> listSort(int option){
         ArrayList<Task> sorted = tasks;
@@ -228,6 +156,78 @@ public class List {
         return matchSearch;
     }
 
+    public static String listAnalytics(){
+        String metricsQuery = """
+    WITH 
+    total_tasks_cte AS (
+        SELECT COUNT(*) AS total_tasks
+        FROM tasks
+    ),
+    completed_tasks_cte AS (
+        SELECT COUNT(*) AS completed_tasks
+        FROM tasks
+        WHERE is_completed = 1
+    ),
+    pending_tasks_cte AS (
+        SELECT COUNT(*) AS pending_tasks
+        FROM tasks
+        WHERE is_completed = 0
+    ),
+    completion_rate_cte AS (
+        SELECT
+            printf('%.2f%%', (COUNT(*) FILTER (WHERE is_completed = 1) * 100.0 / COUNT(*))) AS completion_rate
+        FROM tasks
+    )
+    SELECT 'Total Tasks' AS metric, total_tasks AS value FROM total_tasks_cte
+    UNION ALL
+    SELECT 'Completed Tasks', completed_tasks FROM completed_tasks_cte
+    UNION ALL
+    SELECT 'Pending Tasks', pending_tasks FROM pending_tasks_cte
+    UNION ALL
+    SELECT 'Completion Rate', completion_rate FROM completion_rate_cte
+    """;
+
+
+        // SQL query to calculate task category counts
+        String categoriesQuery = """
+            SELECT task_category, COUNT(*) AS task_count
+            FROM tasks
+            GROUP BY task_category
+            ORDER BY task_count DESC
+            """;
+
+        String  output = "" ;
+        try (Connection conn = Database.getConnection()) {
+            // Execute and display task metrics
+            try (PreparedStatement stmt = conn.prepareStatement(metricsQuery);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                output += "Task Metrics:\n";
+                while (rs.next()) {
+                    output += rs.getString("metric") + ": " + rs.getString("value") + "\n";
+                }
+            }
+
+            // Execute and display task categories
+            try (PreparedStatement stmt = conn.prepareStatement(categoriesQuery);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                output += "\nTask Categories:\n";
+                while (rs.next()) {
+                    output += rs.getString("task_category") + ": " + rs.getInt("task_count") +"\n";
+                }
+            }
+            
+
+        } catch (SQLException e) {
+            // Handle SQLException
+            System.err.println("An error occurred while accessing the database: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return output;
+
+    }
+    
     public String getTaskName(int x) {
         for (Task task : tasks) {
         if (task.getID() == x)
@@ -246,18 +246,5 @@ public class List {
 
     public static ArrayList<Task> getList(){
         return tasks;
-    }
-    //debugging purpose
-    public void display() {
-        for (Task task : tasks)
-            System.out.println("Task{" +
-                "taskId=" + task.getID() +
-                ", taskName='" + task.getName() + '\'' +
-                ", taskDescription='" + task.getDescription() + '\'' +
-                ", taskDueDate='" + task.getDueDate() + '\'' +
-                ", taskCategory='" + task.getCategory() + '\'' +
-                ", taskPriority='" + task.getPriorityName() + '\'' +
-                ", isCompleted=" + task.getIsCompleted() +
-                '}');
     }
 }
