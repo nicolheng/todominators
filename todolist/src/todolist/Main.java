@@ -294,11 +294,10 @@ public class Main extends Application {
                 selectedRecurring = "None"; 
             }
             
-            List newTask = new List();
-            int newTaskId = newTask.getTaskId(title);
-    
+            List.listLoad();
+            int newTaskId = List.getTaskId(title);
             if (selectedDependencyTask != null) {
-                int selectedDependencyId = newTask.getTaskId(selectedDependencyTaskName);
+                int selectedDependencyId = List.getTaskId(selectedDependencyTaskName);
                 String success = Task.taskDependency(newTaskId, selectedDependencyId);
                 if (success != null) {
                     showAlert(success);
@@ -444,13 +443,11 @@ public class Main extends Application {
 
             Task.taskCreate(title, description, dueDate, selectedCategory, selectedPriority, selectedRecurring);
             
-            List newTask = new List();
-
-            int newTaskId = newTask.getTaskId(title);
-
+            List.listLoad();
+            int newTaskId = List.getTaskId(title);
             if (selectedDependencyTask != null) {
-                int selectedDependencyId = newTask.getTaskId(selectedDependencyTaskName);
-                String success = Task.taskDependency(newTaskId, selectedDependencyId); 
+                int selectedDependencyId = List.getTaskId(selectedDependencyTaskName);
+                String success = Task.taskDependency(newTaskId, selectedDependencyId);
             }
     
             // Refresh the parent TableView
