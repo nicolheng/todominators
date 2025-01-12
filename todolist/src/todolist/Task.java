@@ -160,7 +160,7 @@ public class Task {
         System.out.println("Task \"" + title + "\" added successfully!");
     }
 
-    public boolean taskComplete(int taskId) {
+    public String taskComplete(int taskId) {
         dc_taskDependsName = new ArrayList<>();
         dc_taskId = new ArrayList<>();
         dc_taskDependsId = new ArrayList<>();
@@ -173,22 +173,23 @@ public class Task {
         // If no dependencies or all dependencies are completed, mark task as completed
         String query2 = "UPDATE tasks SET is_completed = TRUE WHERE task_id = " + taskId;
         
-        List l = new List();
-        if (taskCompleteCheck(query1, l.getTaskName(taskId), taskId)) {
+        List.listLoad();
+        String msg = taskCompleteCheck(query1, List.getTaskName(taskId), taskId);
+        if (msg == null) {
             if (Database.executeUpdate(query2)) {
-                System.out.println("Task \"" + l.getTaskName(taskId) + "\" marked as complete!");
+                System.out.println("Task \"" + List.getTaskName(taskId) + "\" marked as complete!");
             }
         }
         else {
-            return false;
+            return msg;
         }
         if (taskRecurringCheck()){
             taskRecurring();
         }
-        return true;
+        return null;
     }
         
-    private boolean taskCompleteCheck(String query, String n, int taskId) {
+    private String taskCompleteCheck(String query, String n, int taskId) {
         try (Connection conn = Database.getConnection();
             var stmt = conn.prepareStatement(query);){
             stmt.setInt(1, taskId);
@@ -199,25 +200,23 @@ public class Task {
                 dc_isCompleted.add(rs.getBoolean("is_completed"));
             }
             if (dc_taskDependsName.isEmpty()) {
-                return true;
+                return null;
             }
         } catch (SQLException e) {
             System.out.println("Error occurs. " + e.getMessage());
         }
-            
-        boolean dependencyDone = true;
+            String msg = null;
         for (int i = 0; i < dc_isCompleted.size(); i++) {
             if (!dc_isCompleted.get(i)) {
-                dependencyDone = false;
-                System.out.println("Warning: Task \"" + n + "\" cannot be marked as complete because it depends on \"" +
-                        dc_taskDependsName.get(i) + "\". Please complete \"" + dc_taskDependsName.get(i) + "\" first.");
+                msg = "Warning: Task \"" + n + "\" cannot be marked as complete because it depends on \"" +
+                        dc_taskDependsName.get(i) + "\". Please complete \"" + dc_taskDependsName.get(i) + "\" first.";
                 break;
             }
         }
         dc_taskDependsName.clear();
         dc_taskDependsId.clear();
         dc_isCompleted.clear();
-        return dependencyDone;
+        return msg;
     }
     
     public static void taskEdit(String title, String description, LocalDate dueDate, String category, String priority, String recurrString, int id){
@@ -290,15 +289,15 @@ public class Task {
         dc_taskDependsId = new ArrayList<>();
         dc_isCompleted = new ArrayList<>();
         String query1 = "SELECT task_id, depends_on_task_id FROM task_dependencies";
-        List l = new List();
+        List.listLoad();
         String msg = null;
         if (taskDependencyCheck(query1, taskId, dependsOnTaskId)){
-            msg = "Warning: Task \"" + l.getTaskName(taskId) + "\" cannot depends on \"" + l.getTaskName(dependsOnTaskId) + "\" because it will cause a loop. ";
+            msg = "Warning: Task \"" + List.getTaskName(taskId) + "\" cannot depends on \"" + List.getTaskName(dependsOnTaskId) + "\" because it will cause a loop. ";
         }
         else {
             String query2 = "INSERT INTO task_dependencies (task_id, depends_on_task_id) VALUES (" + taskId + ", " + dependsOnTaskId + ")";
             if (!Database.executeUpdate(query2))
-                msg = "Task \"" + l.getTaskName(taskId) + "\" already depends on \"" + l.getTaskName(dependsOnTaskId) + "\".";
+                msg = "Task \"" + List.getTaskName(taskId) + "\" already depends on \"" + List.getTaskName(dependsOnTaskId) + "\".";
         }
         return msg;
     }

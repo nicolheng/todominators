@@ -321,12 +321,10 @@ public class Main extends Application {
 
         completeButton.setOnAction(event -> {
             Task dependency = dependencyComboBox.getValue();
-            Boolean completeCheck = task.taskComplete(task.getID());
+            String completeCheckMsg = task.taskComplete(task.getID());
             System.out.println("test");
-            if (!completeCheck){
-                System.out.println("yesss");
-                showAlert("Warning: Task \"" + task.getName() + "\" cannot be marked as complete because it depends on \"" +
-                        dependency.getName() + "\". Please complete\"" + dependency.getName() + "\" first.");
+            if (completeCheckMsg != null){
+                showAlert(completeCheckMsg);
             }
             List.listLoad();
             tableView.setItems(sortTasks(sortDropdown.getValue()));

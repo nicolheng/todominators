@@ -228,7 +228,7 @@ public class List {
 
     }
     
-    public String getTaskName(int x) {
+    public static String getTaskName(int x) {
         for (Task task : tasks) {
         if (task.getID() == x)
             return task.getName();
